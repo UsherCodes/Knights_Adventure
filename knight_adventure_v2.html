@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Knight Adventure</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { background: #f0f0f0; display: block; margin: auto; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        // Game variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let player, enemies = [], levels = [];
+        let currentLevel = 0;
+        const totalLevels = 12;
+
+        // Player class
+        class Player {
+            constructor() {
+                this.x = 50;
+                this.y = canvas.height - 70; // Adjust for ground level
+                this.width = 50;
+                this.height = 50;
+                this.speed = 5;
+                this.color = 'blue';
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+            move(dir) {
+                if(dir === 'LEFT' && this.x > 0) this.x -= this.speed;
+                if(dir === 'RIGHT' && this.x < canvas.width - this.width) this.x += this.speed;
+                if(dir === 'UP' && this.y > 0) this.y -= this.speed;
+                if(dir === 'DOWN' && this.y < canvas.height - this.height) this.y += this.speed;
+            }
+        }
+
+        // Initialize game
+        function init() {
+            player = new Player();
+            for(let i = 0; i < totalLevels; i++) {
+                levels.push([]); // Placeholder for level data (e.g., enemies)
+            }
+            // Level design can be added here
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Game loop
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            player.draw();
+            // Draw enemies and handle game logic
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners for controls
+        window.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft': player.move('LEFT'); break;
+                case 'ArrowRight': player.move('RIGHT'); break;
+                case 'ArrowUp': player.move('UP'); break;
+                case 'ArrowDown': player.move('DOWN'); break;
+            }
+        });
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
