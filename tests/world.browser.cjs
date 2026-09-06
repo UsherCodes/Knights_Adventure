@@ -28,7 +28,7 @@ const { pathToFileURL } = require("node:url");
     await page.goto(pathToFileURL(path.join(__dirname, "../play.html")).href);
     await page.evaluate(() => localStorage.clear());
     await page.reload();
-    await page.click("#start");
+    await page.click("#story-start");
     await page.evaluate(() => {
       p.x = 690;
       p.y = 155;

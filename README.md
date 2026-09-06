@@ -4,7 +4,7 @@ A small knight, an oversized sword, and a baby dragon worth fighting for. Reedâ€
 
 ## Play
 
-**Download `play.html` and open it in a modern browser.** The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
+**Download `Knights_Adventure_Four_Kingdoms.html` and open it in a modern browser.** Choose **Enter Willowbrook** to begin in the new town, or use the secondary button for the original story / saved adventure. `play.html` contains the same build. The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
 
 For development, keep `knight_adventure_v2.html`, `game.js`, `world.js`, and `style.css` together. Open the HTML directly, or run `python3 -m http.server 8080` and visit `http://localhost:8080/knight_adventure_v2.html`.
 

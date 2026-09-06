@@ -1242,3 +1242,24 @@ window.addEventListener("keydown", (e) => {
     }
   }
 });
+
+// Make the new towns visible immediately instead of hiding them behind the old opening.
+if (state === "title") {
+  $("#start").textContent = "Enter Willowbrook →";
+  $("#start").onclick = () => {
+    start(saveAvailable);
+    World.travel("greenvale");
+  };
+  const storyStart = document.createElement("button");
+  storyStart.id = "story-start";
+  storyStart.className = "secondary";
+  storyStart.style.cssText = "display:block;margin-top:18px;padding:12px 18px";
+  storyStart.textContent = saveAvailable
+    ? "Continue saved adventure"
+    : "Play Ember’s rescue first";
+  storyStart.onclick = () => start(saveAvailable);
+  $("#start").after(storyStart);
+  $(".intro .chapter").textContent = "KINGDOMS EDITION · TOWNS & WORLD TRAVEL";
+  $(".intro-note").textContent =
+    "Four realms · Town quests · Action + Dodge controls";
+}

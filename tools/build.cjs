@@ -25,4 +25,8 @@ if (
 )
   throw new Error("Source tags changed: update the bundler.");
 fs.writeFileSync(path.join(root, "play.html"), bundled);
+fs.writeFileSync(
+  path.join(root, "Knights_Adventure_Four_Kingdoms.html"),
+  bundled,
+);
 console.log("Built play.html — open this file directly in your browser.");
