@@ -13,11 +13,16 @@ const output = source
     '<script src="game.js"></script>',
     () => "<script>\n" + read("game.js") + "\n</script>",
   );
+const bundled = output.replace(
+  '<script src="world.js"></script>',
+  () => "<script>\n" + read("world.js") + "\n</script>",
+);
 if (
   output === source ||
   output.includes('src="game.js"') ||
+  bundled.includes('src="world.js"') ||
   output.includes('href="style.css"')
 )
   throw new Error("Source tags changed: update the bundler.");
-fs.writeFileSync(path.join(root, "play.html"), output);
+fs.writeFileSync(path.join(root, "play.html"), bundled);
 console.log("Built play.html — open this file directly in your browser.");

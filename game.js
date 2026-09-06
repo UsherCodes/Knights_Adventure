@@ -103,6 +103,7 @@ function enemy(type, x, y) {
   };
 }
 function reset() {
+  globalThis.World?.resetRuntime();
   toastTime = 0;
   $("#toast").style.opacity = 0;
   p = {
@@ -180,6 +181,10 @@ function reset() {
   cam = 0;
 }
 function save() {
+  if (globalThis.World?.location) {
+    World.persist();
+    return;
+  }
   try {
     localStorage.setItem(
       "knights-ember-v1",
@@ -201,6 +206,7 @@ function save() {
       }),
     );
     saveAvailable = true;
+    globalThis.World?.persist();
   } catch {
     /* Storage can be unavailable for local/private files. */
   }
@@ -232,6 +238,7 @@ function load() {
       dragon.x = p.x - 30;
     }
     cam = clamp(p.x - view * 0.45, 0, W - view);
+    globalThis.World?.restore();
     return true;
   } catch {
     return false;
@@ -240,15 +247,17 @@ function load() {
 function start(resume = false) {
   reset();
   if (resume) load();
+  else globalThis.World?.newGame();
   state = "playing";
   $("#overlay").hidden = true;
   $(".game-wrap").classList.add("playing");
   keys.clear();
   canvas.focus();
+  globalThis.World?.onStart();
   notify(
     p.companion
       ? "Ember is with you. Explore for any treasure you missed!"
-      : "Find the sun key. J swings your sword; E opens chests.",
+      : "Space: sword or interact. Shift: dodge. M: world map.",
   );
 }
 function showOverlay(title, body, label, fn) {
@@ -286,7 +295,12 @@ function hurt(n, source) {
   if (p.inv > 0 || p.roll > 0) return;
   const a = Math.atan2(source.y - p.y, source.x - p.x),
     facing = Math.cos(a - p.face) > 0.1;
-  if (p.shield && facing && p.stamina >= 8) {
+  if (
+    p.shield &&
+    facing &&
+    p.stamina >= 8 &&
+    !(source.type === "boss" && source.attackType === "slam")
+  ) {
     p.stamina -= 8;
     burst(p.x, p.y, "#c0ecf5", 9);
     tone(760);
@@ -310,7 +324,7 @@ function hurt(n, source) {
     save();
     showOverlay(
       "A hero<br><em>gets back up.</em>",
-      "Your relics and opened gates are saved. Take a breath, then try again.",
+      "Your treasures and progress are saved. Take a breath, then try again.",
       "Retry from checkpoint",
       () => start(true),
     );
@@ -353,6 +367,10 @@ function damage(e, n, bypass = false) {
       });
     if (e.type === "boss") {
       e.dead = true;
+      if (globalThis.World?.location) {
+        World.guardianDefeated();
+        return;
+      }
       checkpoint = "keep";
       notify("The crown is broken. Free Ember from the cage!");
       save();
@@ -383,10 +401,11 @@ function roll() {
   tone(140, 0.12, "triangle");
 }
 function nearby() {
+  if (globalThis.World?.location) return World.nearby();
   for (const x of [1140, 1570])
     if (dist(p, { x, y: 490 }) < 48)
       return {
-        label: "E · Enter the overgrown passage",
+        label: "Space · Enter the overgrown passage",
         action: () => {
           p.x = x === 1140 ? 1570 : 1140;
           p.y = 445;
@@ -397,7 +416,7 @@ function nearby() {
   if (dist(p, { x: 930, y: 300 }) < 85 && !gates.wood)
     return {
       label: p.key
-        ? "E · Unlock the sun gate"
+        ? "Space · Unlock the sun gate"
         : "Find the sun key to open this gate",
       action: () => {
         if (p.key) {
@@ -411,7 +430,7 @@ function nearby() {
     };
   if (dist(p, { x: 1900, y: 300 }) < 90 && !gates.keep)
     return {
-      label: "E · Light the keep beacon",
+      label: "Space · Light the keep beacon",
       action: () => {
         gates.keep = true;
         checkpoint = "keep";
@@ -423,7 +442,8 @@ function nearby() {
   for (const c of chests)
     if (!c.open && dist(p, c) < 60)
       return {
-        label: "E · Open " + (c.kind === "key" ? "sun chest" : "hidden chest"),
+        label:
+          "Space · Open " + (c.kind === "key" ? "sun chest" : "hidden chest"),
         action: () => {
           c.open = true;
           const messages = {
@@ -445,7 +465,7 @@ function nearby() {
   if (dist(p, { x: 2745, y: 300 }) < 70 && !p.companion)
     return {
       label: boss.dead
-        ? "E · Set Ember free"
+        ? "Space · Set Ember free"
         : "The guardian holds Ember’s cage shut",
       action: () => {
         if (!boss.dead) {
@@ -483,6 +503,7 @@ function interact() {
   if (state === "playing") nearby()?.action();
 }
 function moveBody(b, dx, dy) {
+  if (globalThis.World?.location) return World.moveBody(b, dx, dy);
   let nx = clamp(b.x + dx, 30, W - 30),
     ny = clamp(b.y + dy, 100, 540);
   for (const wall of [
@@ -513,6 +534,7 @@ function shoot(e, a, reflected = false) {
   });
 }
 function update(dt) {
+  globalThis.World?.beforeUpdate(dt);
   t += dt;
   stats.time += dt;
   toastTime = Math.max(0, toastTime - dt);
@@ -532,8 +554,17 @@ function update(dt) {
     dy /= len;
     if (p.roll <= 0) p.face = Math.atan2(dy, dx);
   }
+  if (len === 0 && p.attack <= 0 && p.roll <= 0) {
+    const threat =
+      shots.find((s) => !s.reflected && dist(s, p) < 160) ||
+      enemies.find((e) => e.hp > 0 && dist(e, p) < 100);
+    if (threat) p.face = Math.atan2(threat.y - p.y, threat.x - p.x);
+  }
   const shielding =
-    keys.has("l") && p.stamina > 5 && p.roll <= 0 && p.attack <= 0;
+    (keys.has("l") || len === 0) &&
+    p.stamina > 5 &&
+    p.roll <= 0 &&
+    p.attack <= 0;
   if (shielding && !p.shield) p.parry = 0.18;
   p.shield = shielding;
   if (p.roll > 0) {
@@ -556,7 +587,7 @@ function update(dt) {
     p.y = before.y;
     p.roll = 0;
   }
-  if (keys.has("j")) attack();
+  if (keys.has("j") || keys.has(" ")) attack();
   for (const e of [...enemies, boss]) {
     if (e.hp <= 0) continue;
     for (const k of ["cd", "stun", "flash"]) e[k] = Math.max(0, e[k] - dt);
@@ -713,7 +744,7 @@ function update(dt) {
     "III · THE HOLLOW KEEP",
   ][area];
   $("#objective").textContent = p.companion
-    ? "Explore with Ember"
+    ? "M · Explore the four kingdoms"
     : boss.dead
       ? "Free the baby dragon"
       : area === 2
@@ -737,7 +768,11 @@ function update(dt) {
       .join(" · ") || "Seek the hidden relics";
   const near = nearby();
   $("#prompt").style.display = near ? "block" : "none";
-  $("#prompt").textContent = near?.label || "";
+  $("#prompt").textContent = (near?.label || "").replace(
+    "Space",
+    matchMedia("(pointer: coarse)").matches ? "Action" : "Space",
+  );
+  $("#bossbar > span").textContent = "THE HOLLOW GUARDIAN";
   $("#bossbar").hidden = !boss.active || boss.dead;
   $("#bosshealth").style.width = (boss.hp / boss.max) * 100 + "%";
   $("#bossphase").textContent =
@@ -745,7 +780,7 @@ function update(dt) {
       ? "ARMOR EXPOSED · STRIKE NOW"
       : boss.phase === 2
         ? "THE CROWN IS SHATTERING"
-        : "DODGE · PARRY · STRIKE";
+        : "DODGSpace · PARRY · STRIKE";
   $("#footer-text").textContent = p.companion
     ? "Ember is right beside you"
     : checkpoint === "wood"
@@ -764,6 +799,7 @@ function update(dt) {
       0.012,
     );
   }
+  globalThis.World?.afterUpdate(dt);
 }
 function updateBoss(dt) {
   const e = boss;
@@ -1000,6 +1036,10 @@ function drawDragon(x, y, caged) {
   }
 }
 function draw() {
+  if (globalThis.World?.location) {
+    World.draw();
+    return;
+  }
   rect(0, 0, view, 600, "#132c2b");
   ctx.save();
   ctx.translate(
@@ -1178,6 +1218,13 @@ function frame(now) {
 }
 function keydown(e) {
   const k = e.key.toLowerCase();
+  if (state !== "playing" && k !== "escape") return;
+  if (
+    e.target?.tagName === "BUTTON" &&
+    !e.target.dataset.key &&
+    (k === " " || k === "enter")
+  )
+    return;
   if (
     [
       "arrowup",
@@ -1190,6 +1237,7 @@ function keydown(e) {
       "l",
       "e",
       "escape",
+      "shift",
     ].includes(k)
   )
     e.preventDefault();
@@ -1200,7 +1248,17 @@ function keydown(e) {
   if (state !== "playing") return;
   keys.add(k);
   if (!e.repeat) {
-    if (k === "k" || k === " ") roll();
+    if (k === "k" || k === "shift") roll();
+    if (k === " ") {
+      if (
+        nearby() &&
+        !enemies.some((e) => e.hp > 0 && dist(e, p) < 95) &&
+        !(boss.active && !boss.dead)
+      ) {
+        keys.delete(" ");
+        interact();
+      } else attack();
+    }
     if (k === "e") interact();
     if (k === "j") attack();
   }

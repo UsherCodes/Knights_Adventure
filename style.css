@@ -450,3 +450,461 @@ kbd {
     font-size: 13px;
   }
 }
+/* Kingdom atlas, village conversations, and the deliberately small control set. */
+.world-buttons {
+  display: flex;
+  gap: 5px;
+}
+.world-buttons button {
+  background: #233b33;
+  border-color: #75886655;
+  color: #ecd19a;
+}
+.header-right .edition {
+  display: none;
+}
+#world-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #071717c9;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  backdrop-filter: blur(5px);
+}
+#world-modal[hidden] {
+  display: none;
+}
+#world-panel {
+  width: min(600px, 100%);
+  max-height: 90svh;
+  overflow: auto;
+  background: #142b29;
+  border: 1px solid #8e987059;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 30px 100px #0009;
+}
+#world-panel.wide {
+  width: min(1100px, 100%);
+}
+.panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 20px;
+  border-bottom: 1px solid #b7b98825;
+  padding-bottom: 18px;
+}
+.panel-top h2 {
+  font-size: 38px;
+  letter-spacing: -1px;
+  font-weight: normal;
+  margin: 10px 0 0;
+  color: #f2dcb3;
+}
+.close-panel {
+  background: #2c433a;
+  border: 1px solid #82937155;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font: 22px system-ui;
+  flex-shrink: 0;
+}
+.map-intro {
+  max-width: 720px;
+  font-size: 14px;
+}
+.world-road {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font: 9px system-ui;
+  letter-spacing: 1.5px;
+  color: #b5c8ac;
+  margin: 25px 0;
+}
+.world-road i {
+  flex: 1;
+  border-top: 1px dashed #8d9c6866;
+}
+.realm-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.realm-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  border: 1px solid #8ca17777;
+  background: #243e32;
+  padding: 17px;
+  border-radius: 9px;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+}
+.realm-card:hover:enabled {
+  transform: translateY(-4px);
+  border-color: #f3d295;
+}
+.realm-card.locked {
+  opacity: 0.54;
+  cursor: default;
+}
+.realm-card.snow {
+  background: #2d4552;
+}
+.realm-card.sand {
+  background: #514d37;
+}
+.realm-card.ash {
+  background: #493941;
+}
+.realm-number {
+  font: 8px system-ui;
+  letter-spacing: 1px;
+  color: #d8d5aa;
+}
+.realm-art {
+  height: 108px;
+  position: relative;
+  overflow: hidden;
+  margin: 17px -17px 0;
+  background: linear-gradient(#567b6340, #1b382bbb);
+}
+.realm-art:before,
+.realm-art:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 7%;
+  width: 90px;
+  height: 80px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: #719775;
+}
+.realm-art:after {
+  left: 42%;
+  height: 62px;
+  background: #436e57;
+}
+.snow .realm-art:before {
+  background: #c1d9d8;
+}
+.snow .realm-art:after {
+  background: #89aebe;
+}
+.sand .realm-art:before {
+  background: #d2b773;
+  border-radius: 50% 50% 0 0;
+  clip-path: none;
+  height: 53px;
+  width: 150px;
+  left: -10px;
+}
+.sand .realm-art:after {
+  background: #967d4b;
+}
+.ash .realm-art:before {
+  background: #a5796e;
+}
+.ash .realm-art:after {
+  background: #795865;
+}
+.realm-art i {
+  position: absolute;
+  left: 40%;
+  bottom: 0;
+  width: 37px;
+  height: 44px;
+  background: #cbbb93;
+  z-index: 1;
+  box-shadow:
+    -15px 5px #a79e80,
+    17px 5px #a79e80;
+}
+.realm-art i:before {
+  content: "";
+  position: absolute;
+  width: 49px;
+  height: 20px;
+  background: #876454;
+  left: -6px;
+  top: -15px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.realm-art b {
+  position: absolute;
+  right: 15px;
+  top: 5px;
+  color: #edc578;
+  font-size: 30px;
+  font-weight: normal;
+}
+.realm-card h3 {
+  font-size: 26px;
+  font-weight: normal;
+  margin: 17px 0 8px;
+  color: #f5e2b6;
+}
+.town-name {
+  font: 10px system-ui;
+  line-height: 1.6;
+  color: #b9c5b0;
+}
+.realm-card p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #d0d4bd;
+  flex: 1;
+}
+.realm-card strong {
+  display: block;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #c5c19233;
+  font: 10px system-ui;
+  color: #f4d18f;
+  line-height: 1.5;
+}
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 23px;
+}
+.dialog-actions button {
+  margin: 0;
+  min-width: 0;
+  font-size: 12px;
+  padding: 13px 18px;
+}
+.secondary {
+  background: #2c443b;
+  border: 1px solid #8e997755;
+  border-radius: 5px;
+  color: #e9dcba;
+}
+.dialog-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+.speaker {
+  display: flex;
+  align-items: start;
+  gap: 22px;
+  margin-top: 25px;
+}
+.portrait {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 70px;
+  height: 83px;
+  background: #344c3e;
+  border: 1px solid #99ab6b44;
+  border-radius: 8px;
+  color: #ecca82;
+  font-size: 36px;
+}
+.speaker > div > span {
+  font: 9px system-ui;
+  letter-spacing: 1.2px;
+  color: #bdc69e;
+}
+.speaker p {
+  font-size: 14px;
+  line-height: 1.85;
+  margin-top: 10px;
+}
+.journal-lead {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-left: 2px solid #d4b36c;
+  background: #2b443644;
+}
+.journal-lead span,
+.quest-status {
+  font: 9px system-ui;
+  letter-spacing: 1.4px;
+  color: #d5bd83;
+}
+.journal-lead p {
+  font-size: 13px;
+  margin: 10px 0 0;
+}
+.journal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.quest-entry {
+  background: #294036;
+  border: 1px solid #92a37b33;
+  border-radius: 8px;
+  padding: 20px;
+}
+.quest-entry h3 {
+  font-size: 20px;
+  font-weight: normal;
+  margin: 13px 0 8px;
+}
+.quest-entry p {
+  font-size: 11px;
+}
+.quest-entry ul {
+  padding-left: 16px;
+  font: 12px/2 system-ui;
+  color: #c7d1bc;
+}
+.bag-relics {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bag-relics span {
+  padding: 10px;
+  border: 1px solid #8fa47855;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.ending-star {
+  text-align: center;
+  font-size: 75px;
+  color: #efc779;
+  padding-top: 25px;
+}
+.ending-copy {
+  text-align: center;
+  font-size: 20px !important;
+}
+.actions button[hidden] {
+  display: none;
+}
+.actions .attack {
+  width: 68px;
+  background: #d09f5e;
+  color: #1c352e;
+  font-weight: 700;
+}
+.keys > span {
+  margin-left: 15px;
+  color: #a6bb97;
+}
+#prompt {
+  max-width: 92%;
+  white-space: normal;
+  text-align: center;
+}
+#world-panel button:focus-visible {
+  outline: 2px solid #ffda92;
+  outline-offset: 4px;
+}
+@media (max-width: 900px) {
+  .realm-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .realm-art {
+    height: 90px;
+  }
+  .header-right {
+    gap: 6px;
+  }
+}
+@media (max-width: 650px) {
+  header {
+    padding: 0 9px;
+  }
+  .brand span {
+    max-width: 90px;
+    line-height: 1.5;
+  }
+  .world-buttons {
+    gap: 3px;
+  }
+  .world-buttons button,
+  header button {
+    font-size: 10px;
+    padding: 7px;
+  }
+  .header-right {
+    gap: 4px;
+  }
+  #world-modal {
+    padding: 10px;
+  }
+  #world-panel {
+    padding: 18px;
+    max-height: 93svh;
+  }
+  .panel-top h2 {
+    font-size: 29px;
+  }
+  .realm-grid {
+    gap: 9px;
+  }
+  .realm-card {
+    padding: 12px;
+  }
+  .realm-art {
+    margin-left: -12px;
+    margin-right: -12px;
+    height: 78px;
+  }
+  .realm-card h3 {
+    font-size: 21px;
+  }
+  .realm-card p {
+    font-size: 11px;
+  }
+  .realm-number {
+    font-size: 7px;
+  }
+  .realm-card strong {
+    font-size: 9px;
+  }
+  .world-road {
+    gap: 9px;
+    font-size: 7px;
+    letter-spacing: 0.5px;
+  }
+  .journal-grid {
+    grid-template-columns: 1fr;
+  }
+  .portrait {
+    width: 48px;
+    height: 60px;
+    font-size: 26px;
+  }
+  .speaker {
+    gap: 12px;
+  }
+  .speaker p {
+    font-size: 13px;
+  }
+  .map-intro {
+    font-size: 12px;
+  }
+  .dialog-actions button {
+    font-size: 11px;
+  }
+  .quest #objective {
+    max-width: 135px;
+  }
+  .actions {
+    gap: 9px;
+  }
+  .touch .actions button {
+    height: 49px;
+    width: 54px;
+  }
+  .touch .actions .attack {
+    width: 76px;
+  }
+}

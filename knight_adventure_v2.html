@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
-    <title>Knight's Adventure • Ember & the Hollow Crown</title>
+    <title>Knight's Adventure • Ember & the Four Kingdoms</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -26,7 +26,7 @@
           id="game"
           width="960"
           height="600"
-          aria-label="Knight adventure. Move with WASD or arrows. J attacks, K or Space dodges, L shields, E interacts."
+          aria-label="Knight adventure. Move with WASD or arrows. Space attacks or interacts, Shift dodges. Shield raises automatically when still."
           tabindex="0"
         ></canvas>
         <div class="hud" id="hud">
@@ -53,9 +53,9 @@
         <div id="overlay" class="overlay">
           <div class="intro">
             <div class="chapter">A SMALL KNIGHT. A VERY BIG ADVENTURE.</div>
-            <h1>Ember & the<br /><em>Hollow Crown</em></h1>
+            <h1>Ember & the<br /><em>Four Kingdoms</em></h1>
             <p>
-              A stolen dragon. A sleeping kingdom.<br />And one brave little
+              A stolen dragon. Four waiting kingdoms.<br />And one brave little
               knight who won’t turn back.
             </p>
             <button class="primary" id="start">
@@ -66,13 +66,13 @@
           </div>
           <div class="story-card">
             <span>YOUR QUEST</span>
-            <h2>Follow the embers.</h2>
+            <h2>Beyond the Hollow Crown.</h2>
             <p>
-              Find the sun key in the wood. Cross the ruined courtyard. Break
-              the guardian’s crown and bring Ember home.
+              Rescue Ember, meet the rulers of four kingdoms, and help their
+              towns. Open Map during play to visit Willowbrook.
             </p>
             <div class="story-tags">
-              01 THE WOOD<br />02 THE RUINS<br />03 THE HOLLOW KEEP
+              FOUR REALMS<br />FOUR KINGDOMS<br />ONE LITTLE DRAGON
             </div>
           </div>
         </div>
@@ -84,9 +84,10 @@
             ><button data-key="arrowright" aria-label="Move right">▶</button>
           </div>
           <div class="actions">
-            <button data-key="l">Shield</button
-            ><button data-key="k">Roll</button><button data-key="e">Use</button
-            ><button data-key="j" class="attack">Sword</button>
+            <button data-key="l" hidden>Shield</button
+            ><button data-key="shift">Roll</button
+            ><button data-key="e" hidden>Use</button
+            ><button data-key=" " class="attack">Action</button>
           </div>
         </div>
       </section>
@@ -96,11 +97,12 @@
           ><span id="footer-text">A story waiting for its hero</span>
         </div>
         <div class="keys">
-          <kbd>W A S D</kbd> move <kbd>J</kbd> sword <kbd>K / SPACE</kbd> roll
-          <kbd>L</kbd> shield <kbd>E</kbd> use <kbd>ESC</kbd> pause
+          <kbd>W A S D / ↑ ↓ ← →</kbd> move <kbd>SPACE</kbd> action
+          <kbd>SHIFT</kbd> dodge <span>Shield is automatic</span>
         </div>
       </footer>
     </main>
     <script src="game.js"></script>
+    <script src="world.js"></script>
   </body>
 </html>
