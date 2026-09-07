@@ -1,0 +1,910 @@
+:root {
+  color-scheme: dark;
+  --cream: #f4e4be;
+  --gold: #efb95b;
+  --muted: #9caa9e;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #0b1719;
+  color: var(--cream);
+  font:
+    14px Georgia,
+    serif;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  background-image: radial-gradient(
+    ellipse at 50% 30%,
+    #233d3b 0,
+    transparent 70%
+  );
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+.shell {
+  width: min(1320px, 96vw);
+  margin: 24px auto;
+}
+header {
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font: 12px system-ui;
+  letter-spacing: 2.5px;
+  color: var(--gold);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand:first-letter {
+  font-size: 28px;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.edition {
+  font: 9px system-ui;
+  letter-spacing: 2px;
+  color: #8eaaa2;
+}
+header button {
+  border: 1px solid #3b514b;
+  background: #132523;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font: 11px system-ui;
+}
+.game-wrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #53614d;
+  border-radius: 12px;
+  box-shadow: 0 25px 90px #0008;
+  background: #132923;
+  aspect-ratio: 1.6;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  outline: none;
+}
+.hud {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  top: 4%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  text-shadow: 0 2px 4px #000;
+}
+.eyebrow {
+  font: 9px system-ui;
+  letter-spacing: 2px;
+  color: #d3d6af;
+}
+.hearts {
+  font: 22px system-ui;
+  letter-spacing: 3px;
+  color: #f58b75;
+  margin: 5px 0;
+}
+.stamina {
+  width: 142px;
+  height: 4px;
+  background: #12201a;
+}
+.stamina i {
+  display: block;
+  background: #97cbab;
+  width: 100%;
+  height: 100%;
+  transition: width 0.1s;
+}
+.quest {
+  text-align: center;
+}
+#objective {
+  margin-top: 8px;
+  font-size: 17px;
+}
+.loot {
+  text-align: right;
+  font: 18px system-ui;
+  color: #f3c678;
+}
+.loot small {
+  display: block;
+  font: 10px system-ui;
+  color: #e1dab9;
+  max-width: 150px;
+  margin-top: 9px;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 8%;
+  gap: 10%;
+  background: linear-gradient(90deg, #091c20ef, #102c29ac 65%, #091b2155);
+}
+.overlay[hidden] {
+  display: none;
+}
+.intro {
+  max-width: 560px;
+}
+.chapter {
+  font: 9px system-ui;
+  letter-spacing: 2px;
+  color: #c5c398;
+}
+h1 {
+  font-size: clamp(32px, 5.4vw, 76px);
+  font-weight: normal;
+  line-height: 1.02;
+  letter-spacing: -2px;
+  margin: 22px 0;
+}
+h1 em {
+  color: #eeb95f;
+  font-weight: normal;
+}
+p {
+  font-size: 15px;
+  color: #c5d0be;
+  line-height: 1.8;
+}
+.primary {
+  background: #efbe6c;
+  color: #23302c;
+  border: 1px solid #ffd99e;
+  border-radius: 5px;
+  padding: 16px 24px;
+  box-shadow: 0 4px 0 #a47135;
+  font: 600 13px system-ui;
+  margin-top: 20px;
+  min-width: 230px;
+  text-align: left;
+}
+.primary span {
+  float: right;
+  margin-left: 28px;
+}
+.primary:hover {
+  background: #fbd699;
+  transform: translateY(-1px);
+}
+.intro-note {
+  font: 9px system-ui;
+  letter-spacing: 1.3px;
+  color: #a5b9a9;
+  margin-top: 25px;
+}
+.story-card {
+  border-left: 1px solid #74806455;
+  padding-left: 25px;
+  max-width: 240px;
+  margin-top: 80px;
+}
+.story-card > span,
+.story-tags {
+  font: 9px system-ui;
+  letter-spacing: 2px;
+  color: #d6b878;
+}
+.story-card h2 {
+  font-size: 22px;
+  font-weight: normal;
+}
+.story-card p {
+  font-size: 12px;
+}
+.story-tags {
+  line-height: 3;
+  margin-top: 20px;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 54px;
+  font: 10px system-ui;
+  color: #97aca2;
+  gap: 16px;
+}
+.live-dot {
+  display: inline-block;
+  background: #b0cb87;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.keys {
+  font-size: 10px;
+}
+kbd {
+  font: 9px system-ui;
+  border: 1px solid #40534a;
+  border-radius: 3px;
+  padding: 3px 5px;
+  color: #d3d8c4;
+  margin-left: 9px;
+}
+#toast {
+  position: absolute;
+  top: 23%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border: 1px solid #d4ad6870;
+  background: #10231dee;
+  color: #ffe4a5;
+  border-radius: 5px;
+  max-width: 80%;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+#prompt {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10231de8;
+  border-radius: 4px;
+  color: #f9d589;
+  font: 12px system-ui;
+  padding: 9px 15px;
+  display: none;
+  white-space: nowrap;
+}
+#bossbar {
+  position: absolute;
+  bottom: 5%;
+  left: 25%;
+  width: 50%;
+  text-align: center;
+  font: 9px system-ui;
+  letter-spacing: 3px;
+}
+#bossbar > div {
+  height: 7px;
+  margin: 8px 0;
+  background: #182126;
+  border: 1px solid #967457;
+}
+#bosshealth {
+  height: 100%;
+  background: #e29b62;
+  display: block;
+}
+#bossphase {
+  font-size: 8px;
+  color: #c2b398;
+}
+.touch {
+  display: none;
+  position: absolute;
+  bottom: 2%;
+  left: 3%;
+  right: 3%;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.touch button {
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  background: #1e383bd9;
+  border: 1px solid #abc4a36b;
+  border-radius: 10px;
+  font: 11px system-ui;
+  width: 46px;
+  height: 42px;
+}
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 46px);
+  gap: 4px;
+}
+.dpad button:first-child {
+  grid-column: 2;
+}
+.dpad button:nth-child(2) {
+  grid-column: 1;
+}
+.actions {
+  display: flex;
+  gap: 5px;
+  align-items: end;
+}
+.actions .attack {
+  background: #996c3ed9;
+}
+#resumeNote {
+  font: 11px system-ui;
+  color: #b1c3ac;
+  margin-top: 15px;
+}
+@media (pointer: coarse) {
+  .touch {
+    display: flex;
+  }
+  .keys {
+    display: none;
+  }
+  #prompt {
+    bottom: 26%;
+  }
+  #bossbar {
+    bottom: 22%;
+  }
+  .overlay ~ .touch {
+    visibility: hidden;
+  }
+  .game-wrap.playing .touch {
+    visibility: visible;
+  }
+}
+@media (max-width: 650px) {
+  .shell {
+    width: 100%;
+    margin: 0;
+  }
+  .game-wrap {
+    border-radius: 0;
+    aspect-ratio: auto;
+    height: 78svh;
+  }
+  header {
+    padding: 0 14px;
+    height: 55px;
+  }
+  .brand {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .edition {
+    display: none;
+  }
+  .header-right {
+    gap: 5px;
+  }
+  header button {
+    padding: 7px 9px;
+  }
+  .story-card {
+    display: none;
+  }
+  .overlay {
+    padding: 7%;
+  }
+  h1 {
+    font-size: 48px;
+  }
+  .hud {
+    top: 3%;
+  }
+  .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .hearts {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .stamina {
+    width: 80px;
+  }
+  #objective {
+    font-size: 12px;
+    max-width: 120px;
+  }
+  .loot {
+    font-size: 13px;
+  }
+  .loot small {
+    max-width: 80px;
+    font-size: 8px;
+  }
+  footer {
+    padding: 0 12px;
+  }
+  .keys {
+    display: none;
+  }
+  #toast {
+    font-size: 12px;
+    width: 85%;
+  }
+  .intro p {
+    font-size: 13px;
+  }
+}
+/* Kingdom atlas, village conversations, and the deliberately small control set. */
+.world-buttons {
+  display: flex;
+  gap: 5px;
+}
+.world-buttons button {
+  background: #233b33;
+  border-color: #75886655;
+  color: #ecd19a;
+}
+.header-right .edition {
+  display: none;
+}
+#world-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #071717c9;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  backdrop-filter: blur(5px);
+}
+#world-modal[hidden] {
+  display: none;
+}
+#world-panel {
+  width: min(600px, 100%);
+  max-height: 90svh;
+  overflow: auto;
+  background: #142b29;
+  border: 1px solid #8e987059;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 30px 100px #0009;
+}
+#world-panel.wide {
+  width: min(1100px, 100%);
+}
+.panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 20px;
+  border-bottom: 1px solid #b7b98825;
+  padding-bottom: 18px;
+}
+.panel-top h2 {
+  font-size: 38px;
+  letter-spacing: -1px;
+  font-weight: normal;
+  margin: 10px 0 0;
+  color: #f2dcb3;
+}
+.close-panel {
+  background: #2c433a;
+  border: 1px solid #82937155;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font: 22px system-ui;
+  flex-shrink: 0;
+}
+.map-intro {
+  max-width: 720px;
+  font-size: 14px;
+}
+.world-road {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font: 9px system-ui;
+  letter-spacing: 1.5px;
+  color: #b5c8ac;
+  margin: 25px 0;
+}
+.world-road i {
+  flex: 1;
+  border-top: 1px dashed #8d9c6866;
+}
+.realm-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.realm-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  border: 1px solid #8ca17777;
+  background: #243e32;
+  padding: 17px;
+  border-radius: 9px;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+}
+.realm-card:hover:enabled {
+  transform: translateY(-4px);
+  border-color: #f3d295;
+}
+.realm-card.locked {
+  opacity: 0.54;
+  cursor: default;
+}
+.realm-card.snow {
+  background: #2d4552;
+}
+.realm-card.sand {
+  background: #514d37;
+}
+.realm-card.ash {
+  background: #493941;
+}
+.realm-number {
+  font: 8px system-ui;
+  letter-spacing: 1px;
+  color: #d8d5aa;
+}
+.realm-art {
+  height: 108px;
+  position: relative;
+  overflow: hidden;
+  margin: 17px -17px 0;
+  background: linear-gradient(#567b6340, #1b382bbb);
+}
+.realm-art:before,
+.realm-art:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 7%;
+  width: 90px;
+  height: 80px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: #719775;
+}
+.realm-art:after {
+  left: 42%;
+  height: 62px;
+  background: #436e57;
+}
+.snow .realm-art:before {
+  background: #c1d9d8;
+}
+.snow .realm-art:after {
+  background: #89aebe;
+}
+.sand .realm-art:before {
+  background: #d2b773;
+  border-radius: 50% 50% 0 0;
+  clip-path: none;
+  height: 53px;
+  width: 150px;
+  left: -10px;
+}
+.sand .realm-art:after {
+  background: #967d4b;
+}
+.ash .realm-art:before {
+  background: #a5796e;
+}
+.ash .realm-art:after {
+  background: #795865;
+}
+.realm-art i {
+  position: absolute;
+  left: 40%;
+  bottom: 0;
+  width: 37px;
+  height: 44px;
+  background: #cbbb93;
+  z-index: 1;
+  box-shadow:
+    -15px 5px #a79e80,
+    17px 5px #a79e80;
+}
+.realm-art i:before {
+  content: "";
+  position: absolute;
+  width: 49px;
+  height: 20px;
+  background: #876454;
+  left: -6px;
+  top: -15px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.realm-art b {
+  position: absolute;
+  right: 15px;
+  top: 5px;
+  color: #edc578;
+  font-size: 30px;
+  font-weight: normal;
+}
+.realm-card h3 {
+  font-size: 26px;
+  font-weight: normal;
+  margin: 17px 0 8px;
+  color: #f5e2b6;
+}
+.town-name {
+  font: 10px system-ui;
+  line-height: 1.6;
+  color: #b9c5b0;
+}
+.realm-card p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #d0d4bd;
+  flex: 1;
+}
+.realm-card strong {
+  display: block;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #c5c19233;
+  font: 10px system-ui;
+  color: #f4d18f;
+  line-height: 1.5;
+}
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 23px;
+}
+.dialog-actions button {
+  margin: 0;
+  min-width: 0;
+  font-size: 12px;
+  padding: 13px 18px;
+}
+.secondary {
+  background: #2c443b;
+  border: 1px solid #8e997755;
+  border-radius: 5px;
+  color: #e9dcba;
+}
+.dialog-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+.speaker {
+  display: flex;
+  align-items: start;
+  gap: 22px;
+  margin-top: 25px;
+}
+.portrait {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 70px;
+  height: 83px;
+  background: #344c3e;
+  border: 1px solid #99ab6b44;
+  border-radius: 8px;
+  color: #ecca82;
+  font-size: 36px;
+}
+.speaker > div > span {
+  font: 9px system-ui;
+  letter-spacing: 1.2px;
+  color: #bdc69e;
+}
+.speaker p {
+  font-size: 14px;
+  line-height: 1.85;
+  margin-top: 10px;
+}
+.journal-lead {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-left: 2px solid #d4b36c;
+  background: #2b443644;
+}
+.journal-lead span,
+.quest-status {
+  font: 9px system-ui;
+  letter-spacing: 1.4px;
+  color: #d5bd83;
+}
+.journal-lead p {
+  font-size: 13px;
+  margin: 10px 0 0;
+}
+.journal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.quest-entry {
+  background: #294036;
+  border: 1px solid #92a37b33;
+  border-radius: 8px;
+  padding: 20px;
+}
+.quest-entry h3 {
+  font-size: 20px;
+  font-weight: normal;
+  margin: 13px 0 8px;
+}
+.quest-entry p {
+  font-size: 11px;
+}
+.quest-entry ul {
+  padding-left: 16px;
+  font: 12px/2 system-ui;
+  color: #c7d1bc;
+}
+.bag-relics {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bag-relics span {
+  padding: 10px;
+  border: 1px solid #8fa47855;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.ending-star {
+  text-align: center;
+  font-size: 75px;
+  color: #efc779;
+  padding-top: 25px;
+}
+.ending-copy {
+  text-align: center;
+  font-size: 20px !important;
+}
+.actions button[hidden] {
+  display: none;
+}
+.actions .attack {
+  width: 68px;
+  background: #d09f5e;
+  color: #1c352e;
+  font-weight: 700;
+}
+.keys > span {
+  margin-left: 15px;
+  color: #a6bb97;
+}
+#prompt {
+  max-width: 92%;
+  white-space: normal;
+  text-align: center;
+}
+#world-panel button:focus-visible {
+  outline: 2px solid #ffda92;
+  outline-offset: 4px;
+}
+@media (max-width: 900px) {
+  .realm-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .realm-art {
+    height: 90px;
+  }
+  .header-right {
+    gap: 6px;
+  }
+}
+@media (max-width: 650px) {
+  header {
+    padding: 0 9px;
+  }
+  .brand span {
+    max-width: 90px;
+    line-height: 1.5;
+  }
+  .world-buttons {
+    gap: 3px;
+  }
+  .world-buttons button,
+  header button {
+    font-size: 10px;
+    padding: 7px;
+  }
+  .header-right {
+    gap: 4px;
+  }
+  #world-modal {
+    padding: 10px;
+  }
+  #world-panel {
+    padding: 18px;
+    max-height: 93svh;
+  }
+  .panel-top h2 {
+    font-size: 29px;
+  }
+  .realm-grid {
+    gap: 9px;
+  }
+  .realm-card {
+    padding: 12px;
+  }
+  .realm-art {
+    margin-left: -12px;
+    margin-right: -12px;
+    height: 78px;
+  }
+  .realm-card h3 {
+    font-size: 21px;
+  }
+  .realm-card p {
+    font-size: 11px;
+  }
+  .realm-number {
+    font-size: 7px;
+  }
+  .realm-card strong {
+    font-size: 9px;
+  }
+  .world-road {
+    gap: 9px;
+    font-size: 7px;
+    letter-spacing: 0.5px;
+  }
+  .journal-grid {
+    grid-template-columns: 1fr;
+  }
+  .portrait {
+    width: 48px;
+    height: 60px;
+    font-size: 26px;
+  }
+  .speaker {
+    gap: 12px;
+  }
+  .speaker p {
+    font-size: 13px;
+  }
+  .map-intro {
+    font-size: 12px;
+  }
+  .dialog-actions button {
+    font-size: 11px;
+  }
+  .quest #objective {
+    max-width: 135px;
+  }
+  .actions {
+    gap: 9px;
+  }
+  .touch .actions button {
+    height: 49px;
+    width: 54px;
+  }
+  .touch .actions .attack {
+    width: 76px;
+  }
+}

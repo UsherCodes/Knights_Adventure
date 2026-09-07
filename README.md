@@ -1,0 +1,115 @@
+# Knight’s Adventure: Ember & the Four Kingdoms
+
+A small knight, an oversized sword, and a baby dragon worth fighting for. Reed’s first game now includes the original Hollow Crown adventure and four connected kingdoms with towns, quests, shops, and guardians.
+
+## Play
+
+**Download `Knights_Adventure_Endless_Wilderness.html` and open it in a modern browser.** Choose **Enter Willowbrook** to begin in the new town, or use the secondary button for the original story / saved adventure. `play.html` contains the same build. The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
+
+For development, keep `knight_adventure_v2.html`, `game.js`, `world.js`, and `style.css` together. Open the HTML directly, or run `python3 -m http.server 8080` and visit `http://localhost:8080/knight_adventure_v2.html`.
+
+## Simple controls
+
+| Action                    | Control                           |
+| ------------------------- | --------------------------------- |
+| Move                      | WASD or arrow keys                |
+| Sword, talk, open, gather | **Space** — context decides       |
+| Dodge                     | **Shift**                         |
+| Shield                    | **Automatic when standing still** |
+| Travel                    | Map button or M                   |
+| View quests / use potions | Quests / Bag buttons              |
+| Pause                     | Escape or pause button            |
+
+Phones and tablets have a directional pad and just two action buttons: **Action** and **Dodge**. The Action button attacks when an enemy is close; otherwise it interacts with nearby people, chests, and quest objects. Hold Action to keep swinging. Menus have clickable choices and keyboard focus support.
+
+The knight turns toward nearby threats and raises a shield while standing still. Frontal melee attacks can be parried, and arrows are deflected. Guardian ground slams must be dodged. Old J/K/L/E keys remain available as aliases for sword, roll, shield, and interaction.
+
+Sound starts off; enable it with the Sound button. Losing focus pauses the game. Reduced-motion preferences disable screen shake.
+
+## The Four Kingdoms
+
+| Realm      | Town         | Kingdom / ruler                  | Guardian       |
+| ---------- | ------------ | -------------------------------- | -------------- |
+| Greenvale  | Willowbrook  | The Verdant Court / Queen Elowen | Thorn Regent   |
+| Frostmarch | Hearthwick   | Winterhold / King Aldric         | Frost Warden   |
+| Sunreach   | Saffron Port | Dawnspire / Queen Samira         | Dune Colossus  |
+| Ashenreach | Cinderhaven  | Emberfall / Prince Rowan         | Crownless King |
+
+Each kingdom has its own landscape, town architecture, royal quest, collectible resource, and guardian. Towns contain:
+
+- A royal hall where you accept quests and claim kingdom seals.
+- The Lantern Inn, offering free healing and local rumors.
+- Pip’s Trading Post, selling healing potions for 8 gold.
+- Bram’s Forge, crafting Firebrand, Mirror Shield, and Ghoststep.
+- A wishing well that restores health and energy.
+- An optional bounty to clear all six frontier enemies for 25 gold and two potions.
+- Wandering villagers, gardens or harbor scenery, and a cartographer.
+
+Speak to each ruler, gather three realm resources, and defeat five frontier creatures to open the guardian’s sanctuary. Defeat the guardian and return to the royal hall to earn a seal and 60 gold. Each seal unlocks the next kingdom. Ashenreach also requires **Ember’s rescue** in the original adventure. Earn all four seals to reunite the kingdoms, then continue exploring.
+
+You can open the quest journal or bag at any time during play. Travel is blocked during a guardian fight or when a living enemy is nearby. Towns are safe places to rest and prepare.
+
+## The original Hollow Crown adventure
+
+- **Whispering Wood:** fight leaping slimes, find the sun key, and unlock the eastern gate. Search the southern clearing for Firebrand.
+- **Fallen Courtyard:** flank or parry skeletons and reflect archers’ arrows. Find Mirror Shield, Ghoststep, and the overgrown passage. Light the beacon to enter the keep.
+- **Hollow Keep:** dodge the guardian’s glowing slam circle, then attack while its armor is exposed. Its attacks accelerate below half health.
+- **Ember:** free the dragon after the guardian falls. Ember follows you into the kingdoms, reveals nearby chests, and attacks ordinary enemies with fire.
+
+Firebrand ignites enemies; Mirror Shield adds ricochets to reflected arrows; Ghoststep lets rolls pass through enemies. Relics found in the original adventure or bought at a forge work everywhere.
+
+## Saves
+
+The game automatically saves quests, gathered resources, encounters, kingdom seals, inventory, and the original adventure in browser local storage when available. Travel preserves each destination independently. Your knight’s gold, relics, potions, and companion are shared across the world.
+
+After death or reloading, kingdom adventures resume safely in town with full health. Unfinished guardian fights reset; defeated guardians and completed quests stay complete. Original-adventure progress is retained when traveling to and from the kingdoms. The first version’s existing saves remain readable.
+
+Saves belong to the browser and file/web origin. Moving the downloaded file or changing browsers may give it a separate save. The game remains playable when storage is disabled. **Start a new adventure** resets both the original story and kingdom progress.
+
+## Build and verify
+
+There are no runtime dependencies or remote assets. Pixel art uses Canvas; audio uses Web Audio.
+
+- `node tools/build.cjs` regenerates the portable `play.html`. Commit it with matching source changes.
+- `node tests/game.test.cjs` runs the dependency-free original gameplay simulation checks.
+- `node tests/world.browser.cjs` checks the expansion in Chromium. Install Playwright and Chromium first (`npm install --no-save playwright`, `npx playwright install chromium`). Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` only when using an existing Chromium binary; optionally set `SCREENSHOT_DIR` to choose where test screenshots are written (defaults to `/tmp`).
+
+Browser tests cover Action/Dodge/automatic shielding, the realm unlock sequence, quest resources, sanctuary gates, guardian completion, one-time rewards, shop purchases, potion use, relic sharing, return visits, original-adventure preservation, Ember’s final-realm gate, the four-seal ending, saved-game restoration, death/retry, new-game reset, and desktop/mobile interfaces. Guardian defeats in progression tests are simulated; these checks are not a substitute for human difficulty balancing.
+
+## Dragon Roads: beyond the bosses
+
+After a guardian falls, keep walking **east (right)** past its arena. The path now continues into a new town. The original Hollow Guardian's road leads to Willowbrook. Each kingdom guardian opens an additional settlement and monster valley:
+
+| Kingdom    | New town       | Hostile valley   | Recruitable friends                                              |
+| ---------- | -------------- | ---------------- | ---------------------------------------------------------------- |
+| Greenvale  | Brookhaven     | Mossfang Valley  | Wren the ranger, Moss the friendly slime, Skywing the dragon     |
+| Frostmarch | Snowbell       | Frostfang Pass   | Lyra the healer, Pebble the friendly slime, Snowglow the dragon  |
+| Sunreach   | Oasis Crossing | The Glass Dunes  | Tariq the guard, Bramble the friendly slime, Sunspark the dragon |
+| Ashenreach | Dragonrest     | Cinderfang Gorge | Flint the mage, Cinder the friendly slime, Moonfire the dragon   |
+
+Talk to the people and friendly monsters to invite them along. Clear the twelve hostile creatures and defeat the returning Hollow Guardian before befriending the dragon at the eastern nest. Enemies include lunging Fang Wolves, charging ogres that deal two hearts of damage, and Fire Drakes that breathe three flames at a time. Hostile creatures have red eyes, labeled names, and attack warnings. Friendly creatures are labeled FRIENDLY and cannot be hurt by your sword.
+
+Use **Bag → Traveling friends** to choose up to **two companions**, in addition to Ember. Friends follow you automatically and help with arrows, sword strikes, magic, stunning bounces, healing, or dragon fire. No new combat controls are needed. Friends who rest remain recruited and can rejoin from the party menu.
+
+Walk west out of a new settlement to return through its guardian's pass. Completed guardian roads also appear in the travel menu. Each new road saves its encounters independently from its original kingdom. Recruited friends, the active party, and cleared valleys survive reloads and travel. Return to the original royal hall to claim your kingdom seal; opening the onward road does not replace that quest reward.
+
+`node tests/journeys.browser.cjs` verifies onward paths, recruitable people and monsters, the dragon unlock condition, party limits and swapping, automatic combat/healing, hostile flame attacks, independent scene saves, return routes, and travel to the original story. Use the same Playwright setup as the other browser tests. The build also updates the older download filenames so they contain the current game.
+
+## Endless wilderness: the pattern repeats
+
+The onward adventure now repeats **town → large wilderness → Hollow Guardian → next town**. Each road is 4,800 world units across, with a town at the west end, twelve hostile encounters spread through a much larger wilderness, and the original two-phase Hollow Guardian at the eastern arena. Defeat it and keep walking right to reach the next town. The routes continue generating; they no longer end at the first dragon nest. Guardian health increases gently with later roads and is capped.
+
+Every original kingdom town now has a recruitable person and friendly monster:
+
+| Town         | Person | Friendly monster |
+| ------------ | ------ | ---------------- |
+| Willowbrook  | Nell   | Sprout           |
+| Hearthwick   | Oren   | Snowpea          |
+| Saffron Port | Zara   | Dunelet          |
+| Cinderhaven  | Rook   | Spark            |
+
+Every subsequent town has its own person and friendly monster too, plus a dragon waiting beyond its guardian. Look for green FRIENDLY labels in the square and garden. Companions remain limited to two alongside Ember; choose them in Bag → Traveling friends.
+
+Later roads use kingdom-themed settlement names, such as Brookhaven, Pinewatch, Alderford, and Mossgate. Each road saves separately. Walk west to return to the previous road, or select the latest visited road from Map. Reloading or dying places you safely in the current town; it does not discard earlier towns or friends. Original kingdoms retain their original map sizes and royal quests. Older one-off valley saves are upgraded to the larger wilderness, preserving recruited friends, opened chests, and defeated legacy enemies while adding the returning guardian and new encounters.
+
+Run `node tests/frontier.browser.cjs` with the same Playwright setup to verify original-town friends, uninterrupted royal dialogue, large-map bounds, three successive guardian-to-town transitions, boss-gated progression, backward/forward revisits, reloads, and death recovery. Combat completion is simulated in progression tests.

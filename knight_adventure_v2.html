@@ -1,76 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Knight Adventure</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { background: #f0f0f0; display: block; margin: auto; }
-    </style>
-</head>
-<body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script>
-        // Game variables
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let player, enemies = [], levels = [];
-        let currentLevel = 0;
-        const totalLevels = 12;
-
-        // Player class
-        class Player {
-            constructor() {
-                this.x = 50;
-                this.y = canvas.height - 70; // Adjust for ground level
-                this.width = 50;
-                this.height = 50;
-                this.speed = 5;
-                this.color = 'blue';
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
-            move(dir) {
-                if(dir === 'LEFT' && this.x > 0) this.x -= this.speed;
-                if(dir === 'RIGHT' && this.x < canvas.width - this.width) this.x += this.speed;
-                if(dir === 'UP' && this.y > 0) this.y -= this.speed;
-                if(dir === 'DOWN' && this.y < canvas.height - this.height) this.y += this.speed;
-            }
-        }
-
-        // Initialize game
-        function init() {
-            player = new Player();
-            for(let i = 0; i < totalLevels; i++) {
-                levels.push([]); // Placeholder for level data (e.g., enemies)
-            }
-            // Level design can be added here
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Game loop
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            player.draw();
-            // Draw enemies and handle game logic
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Event listeners for controls
-        window.addEventListener('keydown', (e) => {
-            switch(e.key) {
-                case 'ArrowLeft': player.move('LEFT'); break;
-                case 'ArrowRight': player.move('RIGHT'); break;
-                case 'ArrowUp': player.move('UP'); break;
-                case 'ArrowDown': player.move('DOWN'); break;
-            }
-        });
-
-        // Start the game
-        init();
-    </script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>Knight's Adventure • Ember & the Four Kingdoms</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <a class="brand" href="#" aria-label="Knight's Adventure home"
+          >✦ <span>KNIGHT’S ADVENTURE</span></a
+        >
+        <div class="header-right">
+          <span class="edition">EMBER & THE HOLLOW CROWN</span
+          ><button id="sound" aria-label="Enable sound">Sound off</button
+          ><button id="pause" aria-label="Pause game">Ⅱ</button>
+        </div>
+      </header>
+      <section class="game-wrap">
+        <canvas
+          id="game"
+          width="960"
+          height="600"
+          aria-label="Knight adventure. Move with WASD or arrows. Space attacks or interacts, Shift dodges. Shield raises automatically when still."
+          tabindex="0"
+        ></canvas>
+        <div class="hud" id="hud">
+          <div>
+            <div class="eyebrow">THE LITTLE KNIGHT</div>
+            <div id="hearts" class="hearts">♥ ♥ ♥ ♥ ♥ ♥</div>
+            <div class="stamina"><i id="stamina"></i></div>
+          </div>
+          <div class="quest">
+            <div class="eyebrow" id="area">I · THE WHISPERING WOOD</div>
+            <div id="objective">Find the sun key</div>
+          </div>
+          <div class="loot">
+            <span id="coins">◆ 0</span><small id="relics">No relics yet</small>
+          </div>
+        </div>
+        <div id="toast" role="status" aria-live="polite"></div>
+        <div id="prompt"></div>
+        <div id="bossbar" hidden>
+          <span>THE HOLLOW GUARDIAN</span>
+          <div><i id="bosshealth"></i></div>
+          <small id="bossphase">BREAK THE CROWN</small>
+        </div>
+        <div id="overlay" class="overlay">
+          <div class="intro">
+            <div class="chapter">A SMALL KNIGHT. A VERY BIG ADVENTURE.</div>
+            <h1>Ember & the<br /><em>Four Kingdoms</em></h1>
+            <p>
+              A stolen dragon. Four waiting kingdoms.<br />And one brave little
+              knight who won’t turn back.
+            </p>
+            <button class="primary" id="start">
+              Begin adventure <span>→</span>
+            </button>
+            <div class="intro-note">Explore · Discover · Become a legend</div>
+            <div id="resumeNote"></div>
+          </div>
+          <div class="story-card">
+            <span>YOUR QUEST</span>
+            <h2>Beyond the Hollow Crown.</h2>
+            <p>
+              Rescue Ember, meet the rulers of four kingdoms, and help their
+              towns. Open Map during play to visit Willowbrook.
+            </p>
+            <div class="story-tags">
+              FOUR REALMS<br />FOUR KINGDOMS<br />ONE LITTLE DRAGON
+            </div>
+          </div>
+        </div>
+        <div class="touch" id="touch">
+          <div class="dpad">
+            <button data-key="arrowup" aria-label="Move up">▲</button
+            ><button data-key="arrowleft" aria-label="Move left">◀</button
+            ><button data-key="arrowdown" aria-label="Move down">▼</button
+            ><button data-key="arrowright" aria-label="Move right">▶</button>
+          </div>
+          <div class="actions">
+            <button data-key="l" hidden>Shield</button
+            ><button data-key="shift">Roll</button
+            ><button data-key="e" hidden>Use</button
+            ><button data-key=" " class="attack">Action</button>
+          </div>
+        </div>
+      </section>
+      <footer>
+        <div>
+          <span class="live-dot"></span
+          ><span id="footer-text">A story waiting for its hero</span>
+        </div>
+        <div class="keys">
+          <kbd>W A S D / ↑ ↓ ← →</kbd> move <kbd>SPACE</kbd> action
+          <kbd>SHIFT</kbd> dodge <span>Shield is automatic</span>
+        </div>
+      </footer>
+    </main>
+    <script src="game.js"></script>
+    <script src="world.js"></script>
+    <script src="journeys.js"></script>
+    <script src="frontier.js"></script>
+  </body>
 </html>
