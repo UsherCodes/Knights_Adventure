@@ -202,9 +202,11 @@ const Journeys = (globalThis.Journeys = {
       ? "Good to see you, friend! Choose who travels with you from your traveling party."
       : f.role === "dragon"
         ? danger
-          ? "Those red-eyed monsters have taken over the valley. Defeat all six and I’ll fly with you. " +
+          ? "Those red-eyed monsters have taken over the valley. Defeat them all and I’ll fly with you. " +
             enemies.filter((e) => e.hp <= 0).length +
-            "/6 defeated."
+            "/" +
+            enemies.length +
+            " defeated."
           : "You made the valley safe! May I come with you? I can breathe fire at the bad monsters."
         : f.role === "slime"
           ? "Don’t worry—I’m a friendly monster! I can bounce into bad monsters and stun them. Let’s go on an adventure."

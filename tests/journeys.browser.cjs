@@ -52,7 +52,7 @@ const { pathToFileURL } = require("node:url");
         "walking east beyond defeated boss reaches new town",
       );
       ok(
-        enemies.length === 6 && enemies.some((e) => e.species === "drake"),
+        enemies.length === 12 && enemies.some((e) => e.species === "drake"),
         "new road contains hostile monsters and fire drakes",
       );
       const realm = World.location;
@@ -90,6 +90,7 @@ const { pathToFileURL } = require("node:url");
       );
       World.close();
       for (const foe of enemies) damage(foe, 100, true);
+      damage(boss, 1000, true);
       Journeys.meet(realm + "-dragon");
       document.querySelector(".dialog-actions button").click();
       ok(

@@ -17,15 +17,20 @@ const kingdoms = output.replace(
   '<script src="world.js"></script>',
   () => "<script>\n" + read("world.js") + "\n</script>",
 );
-const bundled = kingdoms.replace(
+const roads = kingdoms.replace(
   '<script src="journeys.js"></script>',
   () => "<script>\n" + read("journeys.js") + "\n</script>",
+);
+const bundled = roads.replace(
+  '<script src="frontier.js"></script>',
+  () => "<script>\n" + read("frontier.js") + "\n</script>",
 );
 if (
   output === source ||
   output.includes('src="game.js"') ||
   bundled.includes('src="world.js"') ||
   bundled.includes('src="journeys.js"') ||
+  bundled.includes('src="frontier.js"') ||
   output.includes('href="style.css"')
 )
   throw new Error("Source tags changed: update the bundler.");
@@ -38,5 +43,10 @@ console.log("Built play.html — open this file directly in your browser.");
 
 fs.writeFileSync(
   path.join(root, "Knights_Adventure_Dragon_Roads.html"),
+  bundled,
+);
+
+fs.writeFileSync(
+  path.join(root, "Knights_Adventure_Endless_Wilderness.html"),
   bundled,
 );

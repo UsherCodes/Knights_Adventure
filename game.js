@@ -3,9 +3,9 @@
 const canvas = document.querySelector("#game"),
   ctx = canvas.getContext("2d");
 const $ = (s) => document.querySelector(s),
-  W = 2880,
   H = 600,
   keys = new Set();
+let W = 2880;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v)),
   dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 let view = 960;
@@ -103,6 +103,7 @@ function enemy(type, x, y) {
   };
 }
 function reset() {
+  W = 2880;
   globalThis.World?.resetRuntime();
   toastTime = 0;
   $("#toast").style.opacity = 0;
@@ -606,7 +607,7 @@ function update(dt) {
       }
     }
     if (e === boss) {
-      if (!e.active && p.x > 2210) {
+      if (!e.active && p.x > (e.arenaStart ? e.arenaStart - 30 : 2210)) {
         e.active = true;
         notify("The Hollow Guardian awakens. Dodge the glowing attack zones!");
       }
@@ -841,7 +842,11 @@ function updateBoss(dt) {
   } else {
     const a = Math.atan2(p.y - e.y, p.x - e.x);
     if (dist(e, p) > 105) {
-      e.x = clamp(e.x + Math.cos(a) * 55 * dt, 2240, 2710);
+      e.x = clamp(
+        e.x + Math.cos(a) * 55 * dt,
+        e.arenaStart || 2240,
+        e.arenaEnd || 2710,
+      );
       e.y = clamp(e.y + Math.sin(a) * 55 * dt, 150, 485);
     }
   }

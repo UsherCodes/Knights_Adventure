@@ -4,7 +4,7 @@ A small knight, an oversized sword, and a baby dragon worth fighting for. Reed�
 
 ## Play
 
-**Download `Knights_Adventure_Dragon_Roads.html` and open it in a modern browser.** Choose **Enter Willowbrook** to begin in the new town, or use the secondary button for the original story / saved adventure. `play.html` contains the same build. The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
+**Download `Knights_Adventure_Endless_Wilderness.html` and open it in a modern browser.** Choose **Enter Willowbrook** to begin in the new town, or use the secondary button for the original story / saved adventure. `play.html` contains the same build. The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
 
 For development, keep `knight_adventure_v2.html`, `game.js`, `world.js`, and `style.css` together. Open the HTML directly, or run `python3 -m http.server 8080` and visit `http://localhost:8080/knight_adventure_v2.html`.
 
@@ -87,10 +87,29 @@ After a guardian falls, keep walking **east (right)** past its arena. The path n
 | Sunreach   | Oasis Crossing | The Glass Dunes  | Tariq the guard, Bramble the friendly slime, Sunspark the dragon |
 | Ashenreach | Dragonrest     | Cinderfang Gorge | Flint the mage, Cinder the friendly slime, Moonfire the dragon   |
 
-Talk to the people and friendly monsters to invite them along. Clear the six hostile creatures in a valley before befriending its dragon at the eastern nest. Enemies include lunging Fang Wolves, charging ogres that deal two hearts of damage, and Fire Drakes that breathe three flames at a time. Hostile creatures have red eyes, labeled names, and attack warnings. Friendly creatures are labeled FRIENDLY and cannot be hurt by your sword.
+Talk to the people and friendly monsters to invite them along. Clear the twelve hostile creatures and defeat the returning Hollow Guardian before befriending the dragon at the eastern nest. Enemies include lunging Fang Wolves, charging ogres that deal two hearts of damage, and Fire Drakes that breathe three flames at a time. Hostile creatures have red eyes, labeled names, and attack warnings. Friendly creatures are labeled FRIENDLY and cannot be hurt by your sword.
 
 Use **Bag → Traveling friends** to choose up to **two companions**, in addition to Ember. Friends follow you automatically and help with arrows, sword strikes, magic, stunning bounces, healing, or dragon fire. No new combat controls are needed. Friends who rest remain recruited and can rejoin from the party menu.
 
 Walk west out of a new settlement to return through its guardian's pass. Completed guardian roads also appear in the travel menu. Each new road saves its encounters independently from its original kingdom. Recruited friends, the active party, and cleared valleys survive reloads and travel. Return to the original royal hall to claim your kingdom seal; opening the onward road does not replace that quest reward.
 
 `node tests/journeys.browser.cjs` verifies onward paths, recruitable people and monsters, the dragon unlock condition, party limits and swapping, automatic combat/healing, hostile flame attacks, independent scene saves, return routes, and travel to the original story. Use the same Playwright setup as the other browser tests. The build also updates the older download filenames so they contain the current game.
+
+## Endless wilderness: the pattern repeats
+
+The onward adventure now repeats **town → large wilderness → Hollow Guardian → next town**. Each road is 4,800 world units across, with a town at the west end, twelve hostile encounters spread through a much larger wilderness, and the original two-phase Hollow Guardian at the eastern arena. Defeat it and keep walking right to reach the next town. The routes continue generating; they no longer end at the first dragon nest. Guardian health increases gently with later roads and is capped.
+
+Every original kingdom town now has a recruitable person and friendly monster:
+
+| Town         | Person | Friendly monster |
+| ------------ | ------ | ---------------- |
+| Willowbrook  | Nell   | Sprout           |
+| Hearthwick   | Oren   | Snowpea          |
+| Saffron Port | Zara   | Dunelet          |
+| Cinderhaven  | Rook   | Spark            |
+
+Every subsequent town has its own person and friendly monster too, plus a dragon waiting beyond its guardian. Look for green FRIENDLY labels in the square and garden. Companions remain limited to two alongside Ember; choose them in Bag → Traveling friends.
+
+Later roads use kingdom-themed settlement names, such as Brookhaven, Pinewatch, Alderford, and Mossgate. Each road saves separately. Walk west to return to the previous road, or select the latest visited road from Map. Reloading or dying places you safely in the current town; it does not discard earlier towns or friends. Original kingdoms retain their original map sizes and royal quests. Older one-off valley saves are upgraded to the larger wilderness, preserving recruited friends, opened chests, and defeated legacy enemies while adding the returning guardian and new encounters.
+
+Run `node tests/frontier.browser.cjs` with the same Playwright setup to verify original-town friends, uninterrupted royal dialogue, large-map bounds, three successive guardian-to-town transitions, boss-gated progression, backward/forward revisits, reloads, and death recovery. Combat completion is simulated in progression tests.

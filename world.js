@@ -131,6 +131,7 @@ const World = (globalThis.World = {
   resetRuntime() {
     this.location = null;
     this.journey = false;
+    this.route = 0;
     globalThis.Journeys?.reset();
     this.records = {};
     this.snapshots = {};
@@ -186,8 +187,14 @@ const World = (globalThis.World = {
   },
   persist() {
     if (this.location)
-      this.snapshots[this.location + (this.journey ? "_beyond" : "")] =
-        this.capture();
+      this.snapshots[
+        this.location +
+          (this.journey
+            ? (this.route || 1) === 1
+              ? "_beyond"
+              : "_road_" + this.route
+            : "")
+      ] = this.capture();
     else this.campaign = this.capture();
     try {
       localStorage.setItem(
@@ -196,6 +203,7 @@ const World = (globalThis.World = {
           v: 2,
           location: this.location,
           journey: !!this.journey,
+          route: this.route || 0,
           records: this.records,
           snapshots: this.snapshots,
           campaign: this.campaign,
@@ -219,6 +227,7 @@ const World = (globalThis.World = {
       this.campaign = d.campaign;
       this.extras = { potions: 1, united: false, ...d.extras };
       this.journey = !!d.journey;
+      this.route = this.journey ? Math.max(1, Number(d.route) || 1) : 0;
       Object.assign(p, d.player);
       if (d.stats) stats = d.stats;
       if (d.location && this.realms.some((r) => r.id === d.location)) {
@@ -263,11 +272,21 @@ const World = (globalThis.World = {
     );
   },
   populate(id, restoring = false) {
-    if (!restoring) this.journey = false;
+    if (!restoring) {
+      this.journey = false;
+      this.route = 0;
+    }
+    W = this.journey ? 4800 : 2880;
     const r = this.realms.find((r) => r.id === id);
     this.location = id;
     this.record().visited = true;
-    const sceneKey = id + (this.journey ? "_beyond" : "");
+    const sceneKey =
+      id +
+      (this.journey
+        ? (this.route || 1) === 1
+          ? "_beyond"
+          : "_road_" + this.route
+        : "");
     if (this.snapshots[sceneKey])
       this.apply(JSON.parse(JSON.stringify(this.snapshots[sceneKey])));
     else if (this.journey && globalThis.Journeys) Journeys.populate();
@@ -312,6 +331,7 @@ const World = (globalThis.World = {
       ];
       checkpoint = "keep";
     }
+    globalThis.Frontier?.prepare();
     p.x = 180;
     p.y = 330;
     p.inv = 1;
@@ -340,6 +360,8 @@ const World = (globalThis.World = {
     if (id === "hollow") {
       this.location = null;
       this.journey = false;
+      this.route = 0;
+      W = 2880;
       if (this.campaign) {
         this.apply(JSON.parse(JSON.stringify(this.campaign)));
         p.x = this.campaign.x;
@@ -367,10 +389,18 @@ const World = (globalThis.World = {
     return enemies.filter((e) => e.hp <= 0).length;
   },
   ready() {
+    if (this.journey) return true;
     const q = this.record();
     return q.accepted && q.items.length === 3 && this.kills() >= 5;
   },
   guardianDefeated() {
+    if (this.journey) {
+      notify(
+        "The Hollow Guardian has fallen! Follow the eastern road to the next town.",
+      );
+      this.persist();
+      return;
+    }
     notify(
       this.current().guardian +
         " defeated! Return to " +
@@ -513,7 +543,7 @@ const World = (globalThis.World = {
       if (overlap(nx, ny)) ny = b.y;
     }
     const closed = (!this.ready() && !boss.dead) || (boss.active && !boss.dead);
-    const wall = 2160;
+    const wall = boss.arenaStart ? boss.arenaStart - 80 : 2160;
     if (
       closed &&
       (Math.abs(nx - wall) < 28 + b.r ||
@@ -1171,21 +1201,22 @@ const World = (globalThis.World = {
         ctx.setLineDash([]);
       }
     }
+    const gateOffset = this.journey ? 1920 : 0;
     for (const y of [130, 400]) {
-      rect(2137, y, 45, 95, "#74837c");
-      rect(2131, y - 8, 57, 14, r.color);
-      torch(2120, y + 25);
-      torch(2195, y + 25);
+      rect(2137 + gateOffset, y, 45, 95, "#74837c");
+      rect(2131 + gateOffset, y - 8, 57, 14, r.color);
+      torch(2120 + gateOffset, y + 25);
+      torch(2195 + gateOffset, y + 25);
     }
     if (!this.ready() && !boss.dead) {
       rect(2153, 225, 14, 173, r.color + "88");
       text("KINGDOM SEAL", 2160, 110, 11, r.color);
     }
-    circle(2510, 310, 125, "#16252525");
+    circle(boss.x, 310, 125, "#16252525");
     ctx.strokeStyle = r.color + "66";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(2510, 310, 125, 0, Math.PI * 2);
+    ctx.arc(boss.x, 310, 125, 0, Math.PI * 2);
     ctx.stroke();
     if (!this.journey) text(r.guardian, 2510, 100, 14, r.color);
     for (const e of enemies) {
@@ -1195,7 +1226,7 @@ const World = (globalThis.World = {
       drawEnemy(e);
       ctx.restore();
     }
-    if (!this.journey) drawBoss();
+    drawBoss();
     globalThis.Journeys?.drawWorld();
     if (p.companion) drawDragon(dragon.x, dragon.y, false);
     knight();
