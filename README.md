@@ -4,7 +4,7 @@ A small knight, an oversized sword, and a baby dragon worth fighting for. Reed�
 
 ## Play
 
-**Download `Knights_Adventure_Four_Kingdoms.html` and open it in a modern browser.** Choose **Enter Willowbrook** to begin in the new town, or use the secondary button for the original story / saved adventure. `play.html` contains the same build. The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
+**Download `Knights_Adventure_Dragon_Roads.html` and open it in a modern browser.** Choose **Enter Willowbrook** to begin in the new town, or use the secondary button for the original story / saved adventure. `play.html` contains the same build. The whole game is inside that file and works offline. Click **Map** to take a caravan to your first town, Willowbrook. You can return to the original adventure at any time from a safe location.
 
 For development, keep `knight_adventure_v2.html`, `game.js`, `world.js`, and `style.css` together. Open the HTML directly, or run `python3 -m http.server 8080` and visit `http://localhost:8080/knight_adventure_v2.html`.
 
@@ -75,3 +75,22 @@ There are no runtime dependencies or remote assets. Pixel art uses Canvas; audio
 - `node tests/world.browser.cjs` checks the expansion in Chromium. Install Playwright and Chromium first (`npm install --no-save playwright`, `npx playwright install chromium`). Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` only when using an existing Chromium binary; optionally set `SCREENSHOT_DIR` to choose where test screenshots are written (defaults to `/tmp`).
 
 Browser tests cover Action/Dodge/automatic shielding, the realm unlock sequence, quest resources, sanctuary gates, guardian completion, one-time rewards, shop purchases, potion use, relic sharing, return visits, original-adventure preservation, Ember’s final-realm gate, the four-seal ending, saved-game restoration, death/retry, new-game reset, and desktop/mobile interfaces. Guardian defeats in progression tests are simulated; these checks are not a substitute for human difficulty balancing.
+
+## Dragon Roads: beyond the bosses
+
+After a guardian falls, keep walking **east (right)** past its arena. The path now continues into a new town. The original Hollow Guardian's road leads to Willowbrook. Each kingdom guardian opens an additional settlement and monster valley:
+
+| Kingdom    | New town       | Hostile valley   | Recruitable friends                                              |
+| ---------- | -------------- | ---------------- | ---------------------------------------------------------------- |
+| Greenvale  | Brookhaven     | Mossfang Valley  | Wren the ranger, Moss the friendly slime, Skywing the dragon     |
+| Frostmarch | Snowbell       | Frostfang Pass   | Lyra the healer, Pebble the friendly slime, Snowglow the dragon  |
+| Sunreach   | Oasis Crossing | The Glass Dunes  | Tariq the guard, Bramble the friendly slime, Sunspark the dragon |
+| Ashenreach | Dragonrest     | Cinderfang Gorge | Flint the mage, Cinder the friendly slime, Moonfire the dragon   |
+
+Talk to the people and friendly monsters to invite them along. Clear the six hostile creatures in a valley before befriending its dragon at the eastern nest. Enemies include lunging Fang Wolves, charging ogres that deal two hearts of damage, and Fire Drakes that breathe three flames at a time. Hostile creatures have red eyes, labeled names, and attack warnings. Friendly creatures are labeled FRIENDLY and cannot be hurt by your sword.
+
+Use **Bag → Traveling friends** to choose up to **two companions**, in addition to Ember. Friends follow you automatically and help with arrows, sword strikes, magic, stunning bounces, healing, or dragon fire. No new combat controls are needed. Friends who rest remain recruited and can rejoin from the party menu.
+
+Walk west out of a new settlement to return through its guardian's pass. Completed guardian roads also appear in the travel menu. Each new road saves its encounters independently from its original kingdom. Recruited friends, the active party, and cleared valleys survive reloads and travel. Return to the original royal hall to claim your kingdom seal; opening the onward road does not replace that quest reward.
+
+`node tests/journeys.browser.cjs` verifies onward paths, recruitable people and monsters, the dragon unlock condition, party limits and swapping, automatic combat/healing, hostile flame attacks, independent scene saves, return routes, and travel to the original story. Use the same Playwright setup as the other browser tests. The build also updates the older download filenames so they contain the current game.

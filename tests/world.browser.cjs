@@ -51,6 +51,9 @@ const { pathToFileURL } = require("node:url");
     await page.evaluate(() => {
       p.x = 100;
       p.y = 300;
+      p.roll = 0;
+      p.attack = 0;
+      keys.clear();
     });
     await page.click("#world-location");
     assert.equal(await page.locator(".realm-card:disabled").count(), 3);

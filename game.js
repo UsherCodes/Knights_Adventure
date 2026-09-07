@@ -292,6 +292,7 @@ function pause() {
   } else if (state === "paused") $("#continue").click();
 }
 function hurt(n, source) {
+  if (source.species === "ogre") n = Math.max(n, 2);
   if (p.inv > 0 || p.roll > 0) return;
   const a = Math.atan2(source.y - p.y, source.x - p.x),
     facing = Math.cos(a - p.face) > 0.1;
@@ -523,6 +524,10 @@ function moveBody(b, dx, dy) {
   b.y = ny;
 }
 function shoot(e, a, reflected = false) {
+  if (e.species === "drake" && !reflected && globalThis.Journeys) {
+    Journeys.breath(e, a);
+    return;
+  }
   shots.push({
     x: e.x,
     y: e.y,
@@ -932,6 +937,10 @@ function knight() {
   ctx.restore();
 }
 function drawEnemy(e) {
+  if (e.species && globalThis.Journeys) {
+    Journeys.drawEnemy(e);
+    return;
+  }
   if (e.hp <= 0) return;
   const x = Math.round(e.x),
     y = Math.round(e.y),
@@ -1194,6 +1203,7 @@ function draw() {
       "#e3d78b" + (Math.sin(t * 2 + i) > 0.1 ? "aa" : "33"),
     );
   }
+  if (!globalThis.World?.location) globalThis.Journeys?.drawWorld();
   ctx.restore();
   const shade = ctx.createLinearGradient(0, 0, 0, 600);
   shade.addColorStop(0, "#071b245c");

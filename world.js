@@ -130,6 +130,8 @@ const World = (globalThis.World = {
   },
   resetRuntime() {
     this.location = null;
+    this.journey = false;
+    globalThis.Journeys?.reset();
     this.records = {};
     this.snapshots = {};
     this.campaign = null;
@@ -183,7 +185,9 @@ const World = (globalThis.World = {
     };
   },
   persist() {
-    if (this.location) this.snapshots[this.location] = this.capture();
+    if (this.location)
+      this.snapshots[this.location + (this.journey ? "_beyond" : "")] =
+        this.capture();
     else this.campaign = this.capture();
     try {
       localStorage.setItem(
@@ -191,6 +195,7 @@ const World = (globalThis.World = {
         JSON.stringify({
           v: 2,
           location: this.location,
+          journey: !!this.journey,
           records: this.records,
           snapshots: this.snapshots,
           campaign: this.campaign,
@@ -213,6 +218,7 @@ const World = (globalThis.World = {
       this.snapshots = d.snapshots;
       this.campaign = d.campaign;
       this.extras = { potions: 1, united: false, ...d.extras };
+      this.journey = !!d.journey;
       Object.assign(p, d.player);
       if (d.stats) stats = d.stats;
       if (d.location && this.realms.some((r) => r.id === d.location)) {
@@ -257,11 +263,14 @@ const World = (globalThis.World = {
     );
   },
   populate(id, restoring = false) {
+    if (!restoring) this.journey = false;
     const r = this.realms.find((r) => r.id === id);
     this.location = id;
     this.record().visited = true;
-    if (this.snapshots[id])
-      this.apply(JSON.parse(JSON.stringify(this.snapshots[id])));
+    const sceneKey = id + (this.journey ? "_beyond" : "");
+    if (this.snapshots[sceneKey])
+      this.apply(JSON.parse(JSON.stringify(this.snapshots[sceneKey])));
+    else if (this.journey && globalThis.Journeys) Journeys.populate();
     else {
       enemies = [
         enemy("slime", 1120, 290),
@@ -330,6 +339,7 @@ const World = (globalThis.World = {
     this.persist();
     if (id === "hollow") {
       this.location = null;
+      this.journey = false;
       if (this.campaign) {
         this.apply(JSON.parse(JSON.stringify(this.campaign)));
         p.x = this.campaign.x;
@@ -397,6 +407,7 @@ const World = (globalThis.World = {
     },
   ],
   resources() {
+    if (this.journey) return [];
     return [
       { id: 0, x: 1200, y: 165 },
       { id: 1, x: 1570, y: 480 },
@@ -404,6 +415,8 @@ const World = (globalThis.World = {
     ];
   },
   nearby() {
+    const extra = globalThis.Journeys?.nearby();
+    if (extra) return extra;
     const r = this.current();
     for (const n of this.npcs)
       if (dist(p, n) < 65)
@@ -473,7 +486,7 @@ const World = (globalThis.World = {
               : "Speak to " + r.person + " in the town square first.",
           ),
       };
-    if (boss.dead && p.x > 2220)
+    if (boss.dead && !this.journey && p.x > 2220 && p.x < 2380)
       return {
         label: "Space · Return to the royal hall",
         action: () => {
@@ -515,8 +528,9 @@ const World = (globalThis.World = {
     if (!this.location) return;
     this.clock += dt;
   },
-  afterUpdate() {
+  afterUpdate(dt) {
     if (!this.location) {
+      globalThis.Journeys?.update(dt || 0);
       $("#world-location").textContent = "Map";
       return;
     }
@@ -527,7 +541,9 @@ const World = (globalThis.World = {
       p.x < 900
         ? r.town
         : boss.dead
-          ? "Return to " + r.person
+          ? this.journey
+            ? "Follow the road to the dragon nest"
+            : "East → new town · West → royal hall"
           : this.ready()
             ? "Defeat the realm guardian"
             : q.accepted
@@ -554,6 +570,7 @@ const World = (globalThis.World = {
       ]
         .filter(Boolean)
         .join(" · ") || "Stand still to shield";
+    globalThis.Journeys?.update(dt || 0);
   },
   open(title, body, actions = [], wide = false) {
     if (state !== "worldmenu")
@@ -658,6 +675,7 @@ const World = (globalThis.World = {
       ],
       true,
     );
+    globalThis.Journeys?.mapRoutes();
     for (const b of document.querySelectorAll("[data-realm]"))
       b.onclick = () => this.travel(b.dataset.realm);
   },
@@ -667,7 +685,9 @@ const World = (globalThis.World = {
       .map((r) => {
         const q = this.record(r.id),
           snap =
-            this.location === r.id ? { enemies, boss } : this.snapshots[r.id];
+            this.location === r.id && !this.journey
+              ? { enemies, boss }
+              : this.snapshots[r.id];
         const killed = snap?.enemies.filter((e) => e.hp <= 0).length || 0;
         return (
           '<article class="quest-entry"><span class="quest-status">' +
@@ -748,8 +768,13 @@ const World = (globalThis.World = {
         },
       ],
     );
+    globalThis.Journeys?.addPartyButton();
   },
   talk(kind) {
+    if (this.journey && kind === "ruler") {
+      Journeys.townTalk();
+      return;
+    }
     const r = this.current(),
       q = this.record();
     if (kind === "map") {
@@ -1119,7 +1144,7 @@ const World = (globalThis.World = {
     text("EAST →", 862, 300, 9, "#3b493d");
     text(r.town.toUpperCase(), 465, 83, 20, r.color);
     text(r.kingdom, 465, 105, 11, "#e1d7b6");
-    text("THE WILD FRONTIER", 1530, 100, 16, r.color);
+    if (!this.journey) text("THE WILD FRONTIER", 1530, 100, 16, r.color);
     for (const item of this.resources()) {
       if (this.record().items.includes(item.id)) continue;
       const bob = Math.sin(t * 3 + item.id) * 3;
@@ -1162,7 +1187,7 @@ const World = (globalThis.World = {
     ctx.beginPath();
     ctx.arc(2510, 310, 125, 0, Math.PI * 2);
     ctx.stroke();
-    text(r.guardian, 2510, 100, 14, r.color);
+    if (!this.journey) text(r.guardian, 2510, 100, 14, r.color);
     for (const e of enemies) {
       ctx.save();
       if (r.biome === "snow") ctx.filter = "hue-rotate(95deg)";
@@ -1170,13 +1195,19 @@ const World = (globalThis.World = {
       drawEnemy(e);
       ctx.restore();
     }
-    drawBoss();
+    if (!this.journey) drawBoss();
+    globalThis.Journeys?.drawWorld();
     if (p.companion) drawDragon(dragon.x, dragon.y, false);
     knight();
     for (const c of coins) {
       circle(c.x, c.y + Math.sin(t * 4) * 2, 4, "#f6cd7d");
     }
     for (const s of shots) {
+      if (s.fire && !s.reflected) {
+        circle(s.x, s.y, 8, "#ed7959");
+        circle(s.x, s.y, 4, "#ffe09b");
+        continue;
+      }
       ctx.save();
       ctx.translate(s.x, s.y);
       ctx.rotate(Math.atan2(s.vy, s.vx));
