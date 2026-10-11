@@ -7,7 +7,7 @@ const { pathToFileURL } = require("node:url");
     headless: true,
     executablePath:
       process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
-    args: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    args: process.platform === "linux" && process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
       ? [
           "--no-sandbox",
           "--no-zygote",

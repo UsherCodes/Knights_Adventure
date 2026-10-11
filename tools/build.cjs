@@ -21,11 +21,16 @@ const roads = kingdoms.replace(
   '<script src="journeys.js"></script>',
   () => "<script>\n" + read("journeys.js") + "\n</script>",
 );
-const bundled = roads.replace(
+const frontier = roads.replace(
   '<script src="frontier.js"></script>',
   () => "<script>\n" + read("frontier.js") + "\n</script>",
 );
+const bundled = frontier.replace(
+  '<script src="adventures.js"></script>',
+  () => "<script>\n" + read("adventures.js") + "\n</script>",
+);
 if (
+  bundled.includes('src="adventures.js"') ||
   output === source ||
   output.includes('src="game.js"') ||
   bundled.includes('src="world.js"') ||
