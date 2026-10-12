@@ -153,3 +153,11 @@ This remains a 2D game with sprite movement, subtle bobbing and existing combat 
 Press **B** or click **Bag · B** during ordinary fights or guardian battles. The menu pauses the action, including pending attack warnings; drinking a potion consumes one and restores up to three hearts. Press B, Escape, or close the menu to resume. Opening the bag from an already paused game returns to that paused state.
 
 Ada is now a female dragonborn gardener from Middle-earth, with a dedicated realistic sprite (scales, horns, woodland robes and herb apron). Her Singing Oak quest keeps its existing saved state. Other town keepers are unchanged. The new art is embedded in portable builds. `tests/combat-bag-ada.browser.cjs` covers combat menu access, frozen timers, potion consumption, keyboard/click closing, paused return, Ada's identity and quest compatibility.
+
+## Individual people and walking
+
+Mira, Bram, Pip and Orin now have distinct full-body artwork, faces, hairstyles, clothing and builds. Companion roles use different ranger, guard, healer and mage designs; stable identity-based color, size and build variations distinguish generated friends without changing their saved IDs. Aldric, Samira and Rowan have different appearances from Elowen. Ada retains her dedicated dragonborn artwork. Background villagers use additional silhouettes. The finite art library is reused with variations across the endless roads.
+
+The knight uses a four-pose walk cycle. People and humanoid companions use articulated lower-body motion with gentle torso movement. Gait advances with distance actually traveled; stopping or being blocked settles the character, horizontal movement changes facing, and pausing freezes animation. Teleports reset gait rather than creating a long stride. These are 2D sprite animations, not a full 3D skeletal system or eight-direction motion capture. No movement speed, collision, combat rules or save format changes.
+
+The build embeds `assets/people.png` and `assets/knight-walk.png` into every portable file. `tests/people.browser.cjs` covers distinct art, image bounds, gait, stopping, turning, pause, travel resets, stable identity, bounded render caches, and real keyboard movement.

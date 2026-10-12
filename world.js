@@ -1174,6 +1174,8 @@ const World = (globalThis.World = {
         y: 338 + Math.cos(t * 0.5 + i) * 20,
         color: ["#aabc8b", "#b08a76", "#9eb6c0"][i],
         kind: "villager",
+        id: "villager:" + i,
+        variant: [8,9,7][i],
       };
       this.person(n);
     }

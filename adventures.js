@@ -163,7 +163,7 @@ const Adventures = (globalThis.Adventures = {
     text(theme.landmark, x, y + 64, 11, theme.color);
     text(r.restored ? "RESTORED" : "TOWN ADVENTURE", x, y - 89, 10, "#fff1b6");
     if (World.location === "greenvale" && globalThis.Realistic?.keeper(s.keeper.x,s.keeper.y)) {}
-    else if (globalThis.Realistic?.loaded) World.person({kind:"villager",x:s.keeper.x,y:s.keeper.y,color:theme.color});
+    else if (globalThis.Realistic?.loaded) World.person({kind:"keeper",id:"keeper:"+World.location,variant:{frostmarch:2,sunreach:6,ashenreach:7}[World.location],x:s.keeper.x,y:s.keeper.y,color:theme.color});
     else Journeys.friendSprite({role: "guard", color: theme.color}, s.keeper.x, s.keeper.y);
     text(theme.keeper, s.keeper.x, s.keeper.y + 38, 10, "#fff1b6");
     if (!globalThis.Realistic?.camp(800,353)) {circle(800, 353, 16, "#ef9566"); circle(800, 348, 9, "#ffe0a0");} text("CAMP · TALK", 800, 325, 10, "#ffe0a0");

@@ -35,8 +35,15 @@ for (const file of ["realistic-sprites.png", "realistic-terrain.png", "ada-drago
   const asset = "assets/" + file;
   realistic = realistic.replace(asset, "data:image/png;base64," + fs.readFileSync(path.join(root, asset)).toString("base64"));
 }
-const bundled = illustrated.replace('<script src="realistic.js"></script>', () => "<script>\n" + realistic + "\n</script>");
+const rendered = illustrated.replace('<script src="realistic.js"></script>', () => "<script>\n" + realistic + "\n</script>");
+let people = read("people.js");
+for (const file of ["people.png", "knight-walk.png"]) {
+  const asset = "assets/" + file;
+  people = people.replace(asset, "data:image/png;base64," + fs.readFileSync(path.join(root, asset)).toString("base64"));
+}
+const bundled = rendered.replace('<script src="people.js"></script>', () => "<script>\n" + people + "\n</script>");
 if (
+  bundled.includes('src="people.js"') ||
   bundled.includes('src="realistic.js"') ||
   bundled.includes('src="art.js"') ||
   bundled.includes('src="adventures.js"') ||
