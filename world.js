@@ -1100,6 +1100,7 @@ const World = (globalThis.World = {
     globalThis.Art?.terrain(r);
     for (const d of decor) {
       if (d.x < cam - 50 || d.x > cam + view + 50) continue;
+      if (globalThis.Realistic?.decor(d, r)) continue;
       if (d.y < 100 || d.y > 545) {
         if (r.biome === "wood") tree(d.x, d.y, 0.8 + d.s * 0.6);
         else if (r.biome === "snow") {
@@ -1137,6 +1138,7 @@ const World = (globalThis.World = {
           rect(x + 5, y, 7, 6, r.biome === "snow" ? "#b8cabb" : "#a8b578");
       }
     }
+    if (!globalThis.Realistic?.ruin(882, 232, 140)) {
     rect(865, 147, 34, 85, r.wall);
     for (let i = 0; i < 4; i++) {
       ctx.save();
@@ -1145,12 +1147,15 @@ const World = (globalThis.World = {
       rect(0, -4, 43, 7, r.roof);
       ctx.restore();
     }
+    }
     for (const h of this.buildings) this.house(h, r);
+    if (!globalThis.Realistic?.well()) {
     circle(435, 390, 25, "#879789");
     circle(435, 390, 18, "#3b727c");
     circle(435, 390, 10, "#79b2b4");
     rect(404, 382, 5, 29, "#b9a783");
     rect(460, 382, 5, 29, "#b9a783");
+    }
     text("WISHING WELL", 435, 435, 8, "#e3d1a5");
     for (const n of this.npcs) {
       if (n.kind === "board") {

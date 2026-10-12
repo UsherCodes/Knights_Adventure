@@ -162,9 +162,10 @@ const Adventures = (globalThis.Adventures = {
     if (World.location === "ashenreach") { rect(x - 30, y - 70, 8, 100, "#aa8060"); rect(x + 22, y - 70, 8, 100, "#aa8060"); rect(x - 30, y - 70, 60, 8, "#cca276"); circle(x, y - 28, 22, r.restored ? "#ffcd79" : "#9d785a"); rect(x - 26, y - 14, 52, 8, "#d8a573"); }
     text(theme.landmark, x, y + 64, 11, theme.color);
     text(r.restored ? "RESTORED" : "TOWN ADVENTURE", x, y - 89, 10, "#fff1b6");
-    Journeys.friendSprite({role: "guard", color: theme.color}, s.keeper.x, s.keeper.y);
+    if (globalThis.Realistic?.loaded) World.person({kind:"villager",x:s.keeper.x,y:s.keeper.y,color:theme.color});
+    else Journeys.friendSprite({role: "guard", color: theme.color}, s.keeper.x, s.keeper.y);
     text(theme.keeper, s.keeper.x, s.keeper.y + 38, 10, "#fff1b6");
-    circle(800, 353, 16, "#ef9566"); circle(800, 348, 9, "#ffe0a0"); text("CAMP · TALK", 800, 325, 10, "#ffe0a0");
+    if (!globalThis.Realistic?.camp(800,353)) {circle(800, 353, 16, "#ef9566"); circle(800, 348, 9, "#ffe0a0");} text("CAMP · TALK", 800, 325, 10, "#ffe0a0");
     // Optional northern cave and southern route are off the main combat lane.
     rect(s.cave.x - 160, 98, 320, 91, "#233a43");
     rect(s.cave.x - 155, 98, 310, 12, "#74848e");
@@ -172,14 +173,17 @@ const Adventures = (globalThis.Adventures = {
     text(r.caveDone ? "ECHO CAVE · TREASURE FOUND" : "ECHO CAVE · MOON → LEAF → FLAME", s.cave.x, 202, 10, "#d2e7e9");
     ["LEAF", "MOON", "FLAME"].forEach((name, i) => { const rx = s.cave.x - 95 + i * 95; circle(rx, 125, 13, r.caveDone || r.cave.includes(i) ? theme.color : "#64747d"); text(name, rx, 162, 9, "#ffffff"); });
     text("↑ CAVE / RUINS     ↓ OLD CAMPSITE", 1530, 300, 10, "#e4dab6");
+    if (!globalThis.Realistic?.ruin(s.cache.x, s.cache.y + 22, 118)) {
     rect(s.cache.x - 56, s.cache.y - 92, 18, 114, "#6c7f7c");
     rect(s.cache.x + 38, s.cache.y - 65, 18, 87, "#6c7f7c");
     for (let n = 0; n < 4; n++) rect(s.cache.x - 57 + n * 28, s.cache.y + 13, 22, 9, "#87958b");
+    }
     text("RUINED WATCHTOWER", s.cache.x, s.cache.y - 105, 10, "#dddfba");
     rect(s.cache.x - 13, s.cache.y - 10, 26, 19, r.cache ? "#746c55" : "#ddbe76"); text(r.cache ? "EMPTY CACHE" : "TRAIL CACHE", s.cache.x, s.cache.y + 29, 10, "#ead6a5");
     if (r.accepted && !r.found && !r.restored) { circle(s.token.x, s.token.y, 19, "#ffe59c66"); text("!", s.token.x, s.token.y + 6, 22, "#fff0a8"); text(theme.item, s.token.x, s.token.y + 36, 11, "#fff0a8"); }
     if (this.active().some(f => { const q = this.friendRecord(f.id); return q.accepted && !q.found; })) { circle(s.keepsake.x, s.keepsake.y, 15, "#d7bfff"); text("FRIEND'S KEEPSAKE", s.keepsake.x, s.keepsake.y + 30, 10, "#e3d1ff"); }
     const dragonHere = p.companion || this.active().some(f => f.role === "dragon");
+    globalThis.Realistic?.ruin(s.secret.x, s.secret.y + 26, 85);
     ctx.strokeStyle = r.secret || dragonHere ? "#ffda86" : "#6d7b79"; ctx.lineWidth = 7;
     ctx.beginPath(); ctx.arc(s.secret.x, s.secret.y + 18, 31, Math.PI, 0); ctx.stroke();
     text(r.secret ? theme.secret : dragonHere ? "DRAGON SECRET · ACTION" : "SEALED SKY PATH", s.secret.x, s.secret.y + 49, 10, r.secret || dragonHere ? "#ffe5a0" : "#a7b3a7");

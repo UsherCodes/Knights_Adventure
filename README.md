@@ -130,10 +130,20 @@ Validation: `node tests/adventures.browser.cjs` checks all four town restoration
 
 ## Illustrated graphics, individual names, and trail guidance
 
-The browser edition now uses shaded armor and character silhouettes, rounded textured foliage, masonry and tiled roofs, ground materials, softer path edges, and redesigned dragons, wolves, ogres, and slimes. Canvas backing resolution adapts up to 2× for sharper rendering on MacBook displays. Artwork is procedural and bundled locally; the game remains self-contained and playable offline. This is a more detailed illustrated 2D style.
+The illustrated fallback renderer uses shaded armor and character silhouettes, rounded textured foliage, masonry and tiled roofs, ground materials, softer path edges, and redesigned dragons, wolves, ogres, and slimes. Canvas backing resolution adapts up to 2× for sharper rendering on MacBook displays. This procedural layer remains available if the realistic artwork cannot load.
 
 Later-road companions receive individual names instead of numeric suffixes. Existing internal IDs remain unchanged, preserving recruitment, the active party, and personal quests. The first 49 generated roads have unique names across all realms and roles; later names use deterministic family-name combinations.
 
 Sunblossoms now look like flowers and have explicit labels. A trail guide below the game points toward the next royal objective, including remaining resources, gate readiness, returning for a seal, and onward travel. Adventures offers Royal quest, Local adventures, or Hide guide; the preference is saved. Guidance never changes objective requirements or grants progress.
 
 `node tests/presentation.browser.cjs` checks name uniqueness and saved companion identity, guide milestones and preference persistence, rendering in every realm, and creature/boss drawing. All gameplay regression suites should be run alongside it.
+
+## Realistic rendered artwork
+
+The current browser edition loads locally bundled, AI-generated realistic sprite and terrain atlases: detailed steel armor, villagers and queen, ranger companions, wolves, copper dragons, slimes, a stone guardian, oak/pine/palm vegetation, volcanic rocks, timber cottages, a royal hall, well and ruined arches. Forest floor, cobbles, snow and sand use photographic-style textures. The village decorative windmill is replaced by a ruined stone arch. Trees are thinned along the borders to keep routes visible. Campfire lighting, full guardian attack warnings, and readable interaction markers remain.
+
+This remains a 2D game with sprite movement, subtle bobbing and existing combat effects. It is not a 3D engine or a fully animated realistic character system. Some older enemies, small props, quest objects and landmark details still use the illustrated/procedural layer. No gameplay, collision, control or save format is changed.
+
+`realistic.js` loads `assets/realistic-sprites.png` and `assets/realistic-terrain.png`; `tools/build.cjs` embeds both directly into each portable HTML file, so downloads also work offline. The two original atlases total about 6.4 MB; each self-contained HTML copy is consequently larger. Failed image loads fall back to the illustrated renderer.
+
+`node tests/realistic.browser.cjs` checks decoded artwork, source bounds, transparency, offline loading without network requests, four kingdoms, companions, guardian telegraphs, unchanged save state, mobile layout, and the failed-art fallback. Gameplay regression suites and presentation/save migration checks accompany it. Screenshots are reviewed visually; device-specific MacBook performance and human playtesting remain separate checks.

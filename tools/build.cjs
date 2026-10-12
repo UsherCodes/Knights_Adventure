@@ -29,8 +29,15 @@ const adventures = frontier.replace(
   '<script src="adventures.js"></script>',
   () => "<script>\n" + read("adventures.js") + "\n</script>",
 );
-const bundled = adventures.replace('<script src="art.js"></script>', () => "<script>\n" + read("art.js") + "\n</script>");
+const illustrated = adventures.replace('<script src="art.js"></script>', () => "<script>\n" + read("art.js") + "\n</script>");
+let realistic = read("realistic.js");
+for (const file of ["realistic-sprites.png", "realistic-terrain.png"]) {
+  const asset = "assets/" + file;
+  realistic = realistic.replace(asset, "data:image/png;base64," + fs.readFileSync(path.join(root, asset)).toString("base64"));
+}
+const bundled = illustrated.replace('<script src="realistic.js"></script>', () => "<script>\n" + realistic + "\n</script>");
 if (
+  bundled.includes('src="realistic.js"') ||
   bundled.includes('src="art.js"') ||
   bundled.includes('src="adventures.js"') ||
   output === source ||

@@ -8,6 +8,7 @@ const {pathToFileURL}=require('node:url');
   const page=await browser.newPage({viewport:{width:1440,height:1100}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(pathToFileURL(path.join(__dirname,'../play.html')).href);await page.click('#start');
+  assert(await page.evaluate(()=>Realistic.ready),'realistic artwork decoded');
   const results=await page.evaluate(()=>{
    const out=[],ok=(v,m)=>{if(!v)throw Error(m);out.push(m)};
    const names=[];for(const realm of Object.keys(Frontier.names))for(let n=2;n<=50;n++)for(const kind of ['human','monster','dragon'])names.push(Frontier.friendName(kind,realm,n));
@@ -37,7 +38,7 @@ const {pathToFileURL}=require('node:url');
    return out;
   });
   console.log(results.join('\n'));
-  await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'Knights-Adventure-New-Graphics.png'):'/tmp/knights-new-graphics.png'});
+  await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'Knights-Adventure-Realistic-Graphics.png'):'/tmp/knights-new-graphics.png'});
   assert.deepEqual(errors,[]);
   console.log('PASS: names, save migration, guide milestones, graphics and render smoke test');
  }finally{await browser.close();}
