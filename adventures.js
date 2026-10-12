@@ -44,7 +44,67 @@ const Adventures = (globalThis.Adventures = {
   journal() {
     const theme = this.theme(), r = this.record();
     const friends = this.active().map(f => { const q = this.friendRecord(f.id); return `<li>${f.name}: ${q.complete ? "trusted friend" : q.found ? "keepsake found—talk at camp" : q.accepted ? "search the southern campsite" : "talk at camp to learn their story"}</li>`; }).join("");
-    World.open("Local adventures", `<p><strong>${World.current().town}</strong> · ${theme.landmark}</p><ul><li>Town: ${r.restored ? "restored" : r.found ? "return the item to " + theme.keeper : r.accepted ? "find the marked item on the northern trail" : "meet " + theme.keeper + " at the southeast edge of town"}</li><li>Echo Cave: ${r.caveDone ? "solved" : "optional northern cave; listen to its three runes"}</li><li>Southern trail cache: ${r.cache ? "collected" : "unopened"}</li><li>${theme.secret}: ${r.secret ? "discovered" : "a traveling dragon can reveal the hidden entrance"}</li>${friends}</ul><p>All activities are optional. The royal quest and guardian gate work as before.</p>`, [{ label: "Talk with traveling friends", run: () => this.friends() }]);
+    World.open("Local adventures", `<p><strong>${World.current().town}</strong> · ${theme.landmark}</p><ul><li>Town: ${r.restored ? "restored" : r.found ? "return the item to " + theme.keeper : r.accepted ? "find the marked item on the northern trail" : "meet " + theme.keeper + " at the southeast edge of town"}</li><li>Echo Cave: ${r.caveDone ? "solved" : "optional northern cave; listen to its three runes"}</li><li>Southern trail cache: ${r.cache ? "collected" : "unopened"}</li><li>${theme.secret}: ${r.secret ? "discovered" : "a traveling dragon can reveal the hidden entrance"}</li>${friends}</ul><p>All activities are optional. The royal quest and guardian gate work as before.</p>`, [
+      { label: "Guide: royal quest", run: () => this.setGuide("royal") },
+      { label: "Guide: local adventures", run: () => this.setGuide("local") },
+      { label: "Hide exploration guide", run: () => this.setGuide("off") },
+      { label: "Talk with traveling friends", run: () => this.friends() },
+    ]);
+  },
+  setGuide(mode) { this.data().guide = mode; save(); World.close(); this.updateGuide(); },
+  target() {
+    if (!World.location || this.data().guide === "off") return null;
+    const point = (x, y, label) => ({ x, y, label });
+    // Combat always takes precedence over an optional trail.
+    if (boss.active && !boss.dead) return point(boss.x, boss.y, "Guardian fight · dodge glowing warnings, then strike");
+    if (this.data().guide === "local") {
+      const r = this.record(), s = this.sitePositions(), theme = this.theme();
+      if (!r.restored) {
+        if (!r.accepted) return { ...s.keeper, label: "Meet " + theme.keeper };
+        if (!r.found) return { ...s.token, label: "Find the " + theme.item };
+        return { ...s.keeper, label: "Return the " + theme.item + " to restore the landmark" };
+      }
+      const friend = this.active().find(f => !this.friendRecord(f.id).complete);
+      if (friend) {
+        const q = this.friendRecord(friend.id);
+        if (!q.accepted || q.found) return point(800, 350, "Talk with " + friend.name + " at the campfire");
+        return { ...s.keepsake, label: "Find " + friend.name + "’s " + this.role(friend).item };
+      }
+      if (!r.caveDone) return point(s.cave.x - 140, 230, "Explore Echo Cave · read the inscription");
+      if (!r.cache) return { ...s.cache, label: "Search the ruined watchtower" };
+      if (!r.secret && (p.companion || this.active().some(f => f.role === "dragon"))) return { ...s.secret, label: "Let your dragon reveal the hidden sky path" };
+      return point(p.x, p.y, "Available trails complete · bring a dragon for secrets, or follow the royal quest");
+    }
+    const q = World.record(), realm = World.current();
+    if (!World.journey) {
+      if (!q.accepted) return point(488, 273, "Speak to " + realm.person + " and accept the royal quest");
+      if (boss.dead && !q.claimed) return point(488, 273, "Return to " + realm.person + " for your kingdom seal");
+      if (!boss.dead) {
+        const items = World.resources().filter(item => !q.items.includes(item.id)).sort((a,b) => dist(p,a)-dist(p,b));
+        if (items.length) return { ...items[0], label: "Gather " + realm.item + " · " + q.items.length + "/3" };
+        if (World.kills() < 5) {
+          const foe = enemies.filter(e => e.hp > 0).sort((a,b) => dist(p,a)-dist(p,b))[0];
+          if (foe) return point(foe.x, foe.y, "Defeat wilderness foes · " + World.kills() + "/5");
+        }
+        return point(2180, 310, "Gate ready! Head east to the guardian");
+      }
+      return point(2800, 320, "Seal earned · head east for the next town, or use Map for another realm");
+    }
+    if (boss.dead) return point(W - 90, 320, "Guardian defeated! Continue east to the next town");
+    return point(boss.arenaStart - 20, 310, "Explore the wilderness; the Hollow Guardian waits in the east");
+  },
+  direction(target) {
+    if (!target) return "";
+    if (dist(p, target) < 52) return "Here";
+    const dx = target.x-p.x, dy = target.y-p.y;
+    const vertical = Math.abs(dy) > 45 ? dy < 0 ? "north" : "south" : "";
+    const horizontal = Math.abs(dx) > 45 ? dx < 0 ? "west" : "east" : "";
+    return (vertical && horizontal ? vertical + horizontal : vertical || horizontal) || "Nearby";
+  },
+  updateGuide() {
+    const panel = document.querySelector("#trail-guide"), target = this.target();
+    panel.hidden = !target || state === "title";
+    if (target) panel.textContent = this.direction(target) + " · " + target.label + " · Change guide in Adventures";
   },
   rune(index) {
     const r = this.record(); if (r.caveDone) return;
@@ -72,6 +132,7 @@ const Adventures = (globalThis.Adventures = {
   },
   chatterKey: "", chatterClock: 0,
   tick(dt) {
+    this.updateGuide();
     if (!World.location) return;
     this.chatterClock -= dt;
     const r = this.record(), s = this.sitePositions();
@@ -94,7 +155,8 @@ const Adventures = (globalThis.Adventures = {
     // Unique silhouettes and repaired lighting make each town recognizable.
     const x = 850, y = 425;
     circle(x, y + 36, 56, "#09181b55");
-    if (World.location === "greenvale") { rect(x - 8, y - 35, 16, 72, "#97714d"); circle(x, y - 40, 42, r.restored ? "#98dc89" : "#537b56"); for (let n = 0; n < 3; n++) rect(x - 19 + n * 19, y - 12, 3, 22, "#f4db91"); }
+    if (World.location === "greenvale" && globalThis.Art) { tree(x, y + 12, .8); for (let n = 0; n < 3; n++) rect(x - 19 + n * 19, y - 12, 3, 22, "#f4db91"); }
+    else if (World.location === "greenvale") { rect(x - 8, y - 35, 16, 72, "#97714d"); circle(x, y - 40, 42, r.restored ? "#98dc89" : "#537b56"); for (let n = 0; n < 3; n++) rect(x - 19 + n * 19, y - 12, 3, 22, "#f4db91"); }
     if (World.location === "frostmarch") { rect(x - 15, y - 38, 30, 72, "#a5bbc6"); circle(x, y - 48, 22, r.restored ? "#bef7ff" : "#526876"); rect(x - 28, y + 25, 56, 12, "#d2e5e6"); }
     if (World.location === "sunreach") { circle(x, y + 8, 42, "#d6b989"); circle(x, y + 8, 31, r.restored ? "#76cfdf" : "#76674f"); rect(x - 6, y - 30, 12, 45, "#e7ce9d"); if (r.restored) circle(x, y - 28, 15, "#a1eaf2"); }
     if (World.location === "ashenreach") { rect(x - 30, y - 70, 8, 100, "#aa8060"); rect(x + 22, y - 70, 8, 100, "#aa8060"); rect(x - 30, y - 70, 60, 8, "#cca276"); circle(x, y - 28, 22, r.restored ? "#ffcd79" : "#9d785a"); rect(x - 26, y - 14, 52, 8, "#d8a573"); }
@@ -121,9 +183,17 @@ const Adventures = (globalThis.Adventures = {
     ctx.strokeStyle = r.secret || dragonHere ? "#ffda86" : "#6d7b79"; ctx.lineWidth = 7;
     ctx.beginPath(); ctx.arc(s.secret.x, s.secret.y + 18, 31, Math.PI, 0); ctx.stroke();
     text(r.secret ? theme.secret : dragonHere ? "DRAGON SECRET · ACTION" : "SEALED SKY PATH", s.secret.x, s.secret.y + 49, 10, r.secret || dragonHere ? "#ffe5a0" : "#a7b3a7");
+    const target = this.target();
+    if (target && target.x >= cam && target.x <= cam + view && !(boss.active && !boss.dead)) {
+      ctx.strokeStyle = "#fff2ac"; ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.arc(target.x, target.y, 28, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    }
     ctx.restore();
   },
 });
+const trailGuide = document.createElement("div");
+trailGuide.id = "trail-guide"; trailGuide.hidden = true;
+document.querySelector("footer").before(trailGuide);
 // 1. Towns. 2. Friends. 3. Exploration. Existing royal quests keep priority.
 const adventureNearby = World.nearby.bind(World);
 World.nearby = function () {

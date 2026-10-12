@@ -7,6 +7,20 @@ const Frontier = (globalThis.Frontier = {
     sunreach: ["Oasis Crossing", "Sundrift", "Palmwatch", "Amber Wells"],
     ashenreach: ["Dragonrest", "Cinderwatch", "Ashgrove", "Emberhaven"],
   },
+  friendName(kind, realm, road) {
+    const pools = {
+      human: ["Hazel", "Finn", "Rowan", "Tessa", "Jasper", "Mira", "Silas", "Astrid", "Briar", "Theo", "Elara", "Linden", "Freya", "Perry", "Cleo", "Orla"],
+      monster: ["Biscuit", "Puddle", "Button", "Clover", "Noodle", "Pickle", "Acorn", "Truffle", "Waffle", "Tumble", "Dewdrop", "Bumble", "Soot", "Pipkin", "Mochi", "Cricket"],
+      dragon: ["Stormtail", "Moonbeam", "Sunflare", "Copperwing", "Cloudsong", "Starling", "Frostfeather", "Ashwhisper", "Dawnfire", "Rainshadow", "Goldcrest", "Wildspark", "Silvermist", "Nightglow", "Roseflame", "Thunderleaf"],
+    };
+    const i = (road - 2) * 4 + Object.keys(this.names).indexOf(realm);
+    const pool = pools[kind], base = pool[i % pool.length];
+    if (i < pool.length) return base;
+    const families = ["Willow", "Reed", "Thistle", "Vale", "Brook", "Fern", "Alder", "Glen", "Hearth", "Cedar", "Meadow", "Birch", "Juniper", "Wren", "Hollow", "Dale"];
+    let n = Math.floor(i / pool.length) - 1, family = "";
+    do { family = families[n % families.length] + family; n = Math.floor(n / families.length) - 1; } while (n >= 0);
+    return base + " " + family;
+  },
   townFriends: {
     greenvale: ["Nell", "Sprout"],
     frostmarch: ["Oren", "Snowpea"],
@@ -135,7 +149,7 @@ Journeys.roster = function () {
         list.push({
           id: realm + "-road" + n + "-" + kind,
           realm,
-          name: name + " " + n,
+          name: Frontier.friendName(kind, realm, n),
           role,
           color: r.color,
         });

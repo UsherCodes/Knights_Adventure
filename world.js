@@ -1097,6 +1097,7 @@ const World = (globalThis.World = {
     rect(360, 365, 165, 58, r.path);
     for (let x = 196; x < 805; x += 32)
       for (let y = 225; y < 420; y += 26) rect(x, y, 28, 22, "#fff0c218");
+    globalThis.Art?.terrain(r);
     for (const d of decor) {
       if (d.x < cam - 50 || d.x > cam + view + 50) continue;
       if (d.y < 100 || d.y > 545) {
@@ -1181,11 +1182,21 @@ const World = (globalThis.World = {
       circle(item.x, item.y, 23, r.color + "18");
       ctx.save();
       ctx.translate(item.x, item.y + bob);
-      ctx.rotate(Math.PI / 4);
-      rect(-6, -6, 12, 12, r.color);
-      rect(-2, -2, 4, 4, "#fff1c7");
+      if (this.location === "greenvale") {
+        rect(-2, 3, 4, 18, "#9dcc83");
+        rect(1, 11, 9, 4, "#83b776");
+        for (let n = 0; n < 5; n++) {
+          const a = n * Math.PI * 2 / 5;
+          circle(Math.cos(a) * 8, Math.sin(a) * 8, 6, "#fff1ba");
+        }
+        circle(0, 0, 5, "#efba55");
+      } else {
+        ctx.rotate(Math.PI / 4);
+        rect(-8, -8, 16, 16, r.color);
+        rect(-3, -3, 6, 6, "#fff1c7");
+      }
       ctx.restore();
-      text(this.record().items.length + "/3", item.x, item.y - 23, 9, r.color);
+      text(r.item + " · " + this.record().items.length + "/3", item.x, item.y - 29, 10, "#fff1c7");
     }
     for (const c of chests) {
       rect(c.x - 15, c.y - 9, 30, 21, c.open ? "#77644d" : "#bf975d");

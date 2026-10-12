@@ -14,8 +14,10 @@ function resize() {
     360,
     Math.round((canvas.clientWidth / canvas.clientHeight) * 600),
   );
-  canvas.width = view;
-  canvas.height = 600;
+  const resolution = Math.min(2, Math.max(1, (window.devicePixelRatio || 1) * canvas.clientWidth / view));
+  canvas.width = Math.round(view * resolution);
+  canvas.height = Math.round(600 * resolution);
+  ctx.setTransform(resolution, 0, 0, resolution, 0, 0);
 }
 window.addEventListener("resize", resize);
 resize();

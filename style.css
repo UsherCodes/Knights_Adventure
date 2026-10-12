@@ -908,3 +908,6 @@ kbd {
     width: 76px;
   }
 }
+
+#trail-guide { margin: 12px 0 0; padding: 10px 14px; color: #ffedb8; background: #203d3d; border: 1px solid #637a60; border-radius: 8px; font: 14px/1.5 system-ui, sans-serif; overflow-wrap: anywhere; }
+#trail-guide[hidden] { display: none; }

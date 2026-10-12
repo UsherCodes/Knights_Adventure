@@ -919,6 +919,9 @@ kbd {
   }
 }
 
+#trail-guide { margin: 12px 0 0; padding: 10px 14px; color: #ffedb8; background: #203d3d; border: 1px solid #637a60; border-radius: 8px; font: 14px/1.5 system-ui, sans-serif; overflow-wrap: anywhere; }
+#trail-guide[hidden] { display: none; }
+
 </style>
   </head>
   <body>
@@ -1031,8 +1034,10 @@ function resize() {
     360,
     Math.round((canvas.clientWidth / canvas.clientHeight) * 600),
   );
-  canvas.width = view;
-  canvas.height = 600;
+  const resolution = Math.min(2, Math.max(1, (window.devicePixelRatio || 1) * canvas.clientWidth / view));
+  canvas.width = Math.round(view * resolution);
+  canvas.height = Math.round(600 * resolution);
+  ctx.setTransform(resolution, 0, 0, resolution, 0, 0);
 }
 window.addEventListener("resize", resize);
 resize();
@@ -3433,6 +3438,7 @@ const World = (globalThis.World = {
     rect(360, 365, 165, 58, r.path);
     for (let x = 196; x < 805; x += 32)
       for (let y = 225; y < 420; y += 26) rect(x, y, 28, 22, "#fff0c218");
+    globalThis.Art?.terrain(r);
     for (const d of decor) {
       if (d.x < cam - 50 || d.x > cam + view + 50) continue;
       if (d.y < 100 || d.y > 545) {
@@ -3517,11 +3523,21 @@ const World = (globalThis.World = {
       circle(item.x, item.y, 23, r.color + "18");
       ctx.save();
       ctx.translate(item.x, item.y + bob);
-      ctx.rotate(Math.PI / 4);
-      rect(-6, -6, 12, 12, r.color);
-      rect(-2, -2, 4, 4, "#fff1c7");
+      if (this.location === "greenvale") {
+        rect(-2, 3, 4, 18, "#9dcc83");
+        rect(1, 11, 9, 4, "#83b776");
+        for (let n = 0; n < 5; n++) {
+          const a = n * Math.PI * 2 / 5;
+          circle(Math.cos(a) * 8, Math.sin(a) * 8, 6, "#fff1ba");
+        }
+        circle(0, 0, 5, "#efba55");
+      } else {
+        ctx.rotate(Math.PI / 4);
+        rect(-8, -8, 16, 16, r.color);
+        rect(-3, -3, 6, 6, "#fff1c7");
+      }
       ctx.restore();
-      text(this.record().items.length + "/3", item.x, item.y - 23, 9, r.color);
+      text(r.item + " · " + this.record().items.length + "/3", item.x, item.y - 29, 10, "#fff1c7");
     }
     for (const c of chests) {
       rect(c.x - 15, c.y - 9, 30, 21, c.open ? "#77644d" : "#bf975d");
@@ -4261,6 +4277,20 @@ const Frontier = (globalThis.Frontier = {
     sunreach: ["Oasis Crossing", "Sundrift", "Palmwatch", "Amber Wells"],
     ashenreach: ["Dragonrest", "Cinderwatch", "Ashgrove", "Emberhaven"],
   },
+  friendName(kind, realm, road) {
+    const pools = {
+      human: ["Hazel", "Finn", "Rowan", "Tessa", "Jasper", "Mira", "Silas", "Astrid", "Briar", "Theo", "Elara", "Linden", "Freya", "Perry", "Cleo", "Orla"],
+      monster: ["Biscuit", "Puddle", "Button", "Clover", "Noodle", "Pickle", "Acorn", "Truffle", "Waffle", "Tumble", "Dewdrop", "Bumble", "Soot", "Pipkin", "Mochi", "Cricket"],
+      dragon: ["Stormtail", "Moonbeam", "Sunflare", "Copperwing", "Cloudsong", "Starling", "Frostfeather", "Ashwhisper", "Dawnfire", "Rainshadow", "Goldcrest", "Wildspark", "Silvermist", "Nightglow", "Roseflame", "Thunderleaf"],
+    };
+    const i = (road - 2) * 4 + Object.keys(this.names).indexOf(realm);
+    const pool = pools[kind], base = pool[i % pool.length];
+    if (i < pool.length) return base;
+    const families = ["Willow", "Reed", "Thistle", "Vale", "Brook", "Fern", "Alder", "Glen", "Hearth", "Cedar", "Meadow", "Birch", "Juniper", "Wren", "Hollow", "Dale"];
+    let n = Math.floor(i / pool.length) - 1, family = "";
+    do { family = families[n % families.length] + family; n = Math.floor(n / families.length) - 1; } while (n >= 0);
+    return base + " " + family;
+  },
   townFriends: {
     greenvale: ["Nell", "Sprout"],
     frostmarch: ["Oren", "Snowpea"],
@@ -4389,7 +4419,7 @@ Journeys.roster = function () {
         list.push({
           id: realm + "-road" + n + "-" + kind,
           realm,
-          name: name + " " + n,
+          name: Frontier.friendName(kind, realm, n),
           role,
           color: r.color,
         });
@@ -4711,7 +4741,67 @@ const Adventures = (globalThis.Adventures = {
   journal() {
     const theme = this.theme(), r = this.record();
     const friends = this.active().map(f => { const q = this.friendRecord(f.id); return `<li>${f.name}: ${q.complete ? "trusted friend" : q.found ? "keepsake found—talk at camp" : q.accepted ? "search the southern campsite" : "talk at camp to learn their story"}</li>`; }).join("");
-    World.open("Local adventures", `<p><strong>${World.current().town}</strong> · ${theme.landmark}</p><ul><li>Town: ${r.restored ? "restored" : r.found ? "return the item to " + theme.keeper : r.accepted ? "find the marked item on the northern trail" : "meet " + theme.keeper + " at the southeast edge of town"}</li><li>Echo Cave: ${r.caveDone ? "solved" : "optional northern cave; listen to its three runes"}</li><li>Southern trail cache: ${r.cache ? "collected" : "unopened"}</li><li>${theme.secret}: ${r.secret ? "discovered" : "a traveling dragon can reveal the hidden entrance"}</li>${friends}</ul><p>All activities are optional. The royal quest and guardian gate work as before.</p>`, [{ label: "Talk with traveling friends", run: () => this.friends() }]);
+    World.open("Local adventures", `<p><strong>${World.current().town}</strong> · ${theme.landmark}</p><ul><li>Town: ${r.restored ? "restored" : r.found ? "return the item to " + theme.keeper : r.accepted ? "find the marked item on the northern trail" : "meet " + theme.keeper + " at the southeast edge of town"}</li><li>Echo Cave: ${r.caveDone ? "solved" : "optional northern cave; listen to its three runes"}</li><li>Southern trail cache: ${r.cache ? "collected" : "unopened"}</li><li>${theme.secret}: ${r.secret ? "discovered" : "a traveling dragon can reveal the hidden entrance"}</li>${friends}</ul><p>All activities are optional. The royal quest and guardian gate work as before.</p>`, [
+      { label: "Guide: royal quest", run: () => this.setGuide("royal") },
+      { label: "Guide: local adventures", run: () => this.setGuide("local") },
+      { label: "Hide exploration guide", run: () => this.setGuide("off") },
+      { label: "Talk with traveling friends", run: () => this.friends() },
+    ]);
+  },
+  setGuide(mode) { this.data().guide = mode; save(); World.close(); this.updateGuide(); },
+  target() {
+    if (!World.location || this.data().guide === "off") return null;
+    const point = (x, y, label) => ({ x, y, label });
+    // Combat always takes precedence over an optional trail.
+    if (boss.active && !boss.dead) return point(boss.x, boss.y, "Guardian fight · dodge glowing warnings, then strike");
+    if (this.data().guide === "local") {
+      const r = this.record(), s = this.sitePositions(), theme = this.theme();
+      if (!r.restored) {
+        if (!r.accepted) return { ...s.keeper, label: "Meet " + theme.keeper };
+        if (!r.found) return { ...s.token, label: "Find the " + theme.item };
+        return { ...s.keeper, label: "Return the " + theme.item + " to restore the landmark" };
+      }
+      const friend = this.active().find(f => !this.friendRecord(f.id).complete);
+      if (friend) {
+        const q = this.friendRecord(friend.id);
+        if (!q.accepted || q.found) return point(800, 350, "Talk with " + friend.name + " at the campfire");
+        return { ...s.keepsake, label: "Find " + friend.name + "’s " + this.role(friend).item };
+      }
+      if (!r.caveDone) return point(s.cave.x - 140, 230, "Explore Echo Cave · read the inscription");
+      if (!r.cache) return { ...s.cache, label: "Search the ruined watchtower" };
+      if (!r.secret && (p.companion || this.active().some(f => f.role === "dragon"))) return { ...s.secret, label: "Let your dragon reveal the hidden sky path" };
+      return point(p.x, p.y, "Available trails complete · bring a dragon for secrets, or follow the royal quest");
+    }
+    const q = World.record(), realm = World.current();
+    if (!World.journey) {
+      if (!q.accepted) return point(488, 273, "Speak to " + realm.person + " and accept the royal quest");
+      if (boss.dead && !q.claimed) return point(488, 273, "Return to " + realm.person + " for your kingdom seal");
+      if (!boss.dead) {
+        const items = World.resources().filter(item => !q.items.includes(item.id)).sort((a,b) => dist(p,a)-dist(p,b));
+        if (items.length) return { ...items[0], label: "Gather " + realm.item + " · " + q.items.length + "/3" };
+        if (World.kills() < 5) {
+          const foe = enemies.filter(e => e.hp > 0).sort((a,b) => dist(p,a)-dist(p,b))[0];
+          if (foe) return point(foe.x, foe.y, "Defeat wilderness foes · " + World.kills() + "/5");
+        }
+        return point(2180, 310, "Gate ready! Head east to the guardian");
+      }
+      return point(2800, 320, "Seal earned · head east for the next town, or use Map for another realm");
+    }
+    if (boss.dead) return point(W - 90, 320, "Guardian defeated! Continue east to the next town");
+    return point(boss.arenaStart - 20, 310, "Explore the wilderness; the Hollow Guardian waits in the east");
+  },
+  direction(target) {
+    if (!target) return "";
+    if (dist(p, target) < 52) return "Here";
+    const dx = target.x-p.x, dy = target.y-p.y;
+    const vertical = Math.abs(dy) > 45 ? dy < 0 ? "north" : "south" : "";
+    const horizontal = Math.abs(dx) > 45 ? dx < 0 ? "west" : "east" : "";
+    return (vertical && horizontal ? vertical + horizontal : vertical || horizontal) || "Nearby";
+  },
+  updateGuide() {
+    const panel = document.querySelector("#trail-guide"), target = this.target();
+    panel.hidden = !target || state === "title";
+    if (target) panel.textContent = this.direction(target) + " · " + target.label + " · Change guide in Adventures";
   },
   rune(index) {
     const r = this.record(); if (r.caveDone) return;
@@ -4739,6 +4829,7 @@ const Adventures = (globalThis.Adventures = {
   },
   chatterKey: "", chatterClock: 0,
   tick(dt) {
+    this.updateGuide();
     if (!World.location) return;
     this.chatterClock -= dt;
     const r = this.record(), s = this.sitePositions();
@@ -4761,7 +4852,8 @@ const Adventures = (globalThis.Adventures = {
     // Unique silhouettes and repaired lighting make each town recognizable.
     const x = 850, y = 425;
     circle(x, y + 36, 56, "#09181b55");
-    if (World.location === "greenvale") { rect(x - 8, y - 35, 16, 72, "#97714d"); circle(x, y - 40, 42, r.restored ? "#98dc89" : "#537b56"); for (let n = 0; n < 3; n++) rect(x - 19 + n * 19, y - 12, 3, 22, "#f4db91"); }
+    if (World.location === "greenvale" && globalThis.Art) { tree(x, y + 12, .8); for (let n = 0; n < 3; n++) rect(x - 19 + n * 19, y - 12, 3, 22, "#f4db91"); }
+    else if (World.location === "greenvale") { rect(x - 8, y - 35, 16, 72, "#97714d"); circle(x, y - 40, 42, r.restored ? "#98dc89" : "#537b56"); for (let n = 0; n < 3; n++) rect(x - 19 + n * 19, y - 12, 3, 22, "#f4db91"); }
     if (World.location === "frostmarch") { rect(x - 15, y - 38, 30, 72, "#a5bbc6"); circle(x, y - 48, 22, r.restored ? "#bef7ff" : "#526876"); rect(x - 28, y + 25, 56, 12, "#d2e5e6"); }
     if (World.location === "sunreach") { circle(x, y + 8, 42, "#d6b989"); circle(x, y + 8, 31, r.restored ? "#76cfdf" : "#76674f"); rect(x - 6, y - 30, 12, 45, "#e7ce9d"); if (r.restored) circle(x, y - 28, 15, "#a1eaf2"); }
     if (World.location === "ashenreach") { rect(x - 30, y - 70, 8, 100, "#aa8060"); rect(x + 22, y - 70, 8, 100, "#aa8060"); rect(x - 30, y - 70, 60, 8, "#cca276"); circle(x, y - 28, 22, r.restored ? "#ffcd79" : "#9d785a"); rect(x - 26, y - 14, 52, 8, "#d8a573"); }
@@ -4788,9 +4880,17 @@ const Adventures = (globalThis.Adventures = {
     ctx.strokeStyle = r.secret || dragonHere ? "#ffda86" : "#6d7b79"; ctx.lineWidth = 7;
     ctx.beginPath(); ctx.arc(s.secret.x, s.secret.y + 18, 31, Math.PI, 0); ctx.stroke();
     text(r.secret ? theme.secret : dragonHere ? "DRAGON SECRET · ACTION" : "SEALED SKY PATH", s.secret.x, s.secret.y + 49, 10, r.secret || dragonHere ? "#ffe5a0" : "#a7b3a7");
+    const target = this.target();
+    if (target && target.x >= cam && target.x <= cam + view && !(boss.active && !boss.dead)) {
+      ctx.strokeStyle = "#fff2ac"; ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.arc(target.x, target.y, 28, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    }
     ctx.restore();
   },
 });
+const trailGuide = document.createElement("div");
+trailGuide.id = "trail-guide"; trailGuide.hidden = true;
+document.querySelector("footer").before(trailGuide);
 // 1. Towns. 2. Friends. 3. Exploration. Existing royal quests keep priority.
 const adventureNearby = World.nearby.bind(World);
 World.nearby = function () {
@@ -4852,6 +4952,163 @@ drawBoss = function () {
 // Don't restore an old attack warning after a death, reload, or scene change.
 const adventureApply = World.apply.bind(World);
 World.apply = function (data) { adventureApply(data); boss.adventureMove = null; };
+
+</script>
+    <script>
+"use strict";
+// Procedural illustrated materials: offline, deterministic, and independent of game state.
+const Art = (globalThis.Art = {
+  cache: new Map(),
+  ellipse(x,y,rx,ry,color) { ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill(); },
+  poly(points,color,stroke) {ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=color;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}},
+  metal(x,y,w,h,light="#d2dad8",dark="#435b65") {const g=ctx.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,light);g.addColorStop(.35,"#8faaa9");g.addColorStop(.65,dark);g.addColorStop(1,light);return g;},
+  shadow(x,y,r=19) {const g=ctx.createRadialGradient(x,y,1,x,y,r);g.addColorStop(0,"#07121780");g.addColorStop(1,"#07121700");this.ellipse(x,y,r,r*.4,g);},
+  tile(biome) {
+    if(this.cache.has(biome))return this.cache.get(biome);
+    const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d");
+    let seed=8713;const random=()=>((seed=seed*16807%2147483647)/2147483647);
+    const tones={wood:["#314933","#87966b","#142f26"],snow:["#b3c7c6","#e1eae5","#738e94"],sand:["#b49a6b","#dcc28b","#856e50"],ash:["#61514a","#a18468","#352f30"]}[biome]||["#314933","#87966b","#142f26"];
+    g.fillStyle=tones[0];g.fillRect(0,0,256,256);
+    for(let i=0;i<3500;i++){let x=random()*256,y=random()*256;g.globalAlpha=.08+random()*.22;g.fillStyle=tones[i%3];g.fillRect(x,y,1+random()*4,1+random()*2);}
+    g.globalAlpha=.25;g.strokeStyle=tones[1];g.lineWidth=.7;
+    for(let i=0;i<120;i++){let x=random()*256,y=random()*256;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x-3,y-3,x-1,y-6);g.stroke();}
+    this.cache.set(biome,c);return c;
+  },
+  terrain(r) {
+    const start=Math.floor(cam/256)*256;ctx.save();ctx.globalAlpha=.46;
+    const tile=this.tile(r.biome);
+    for(let x=start;x<cam+view+256;x+=256)for(let y=0;y<600;y+=256)ctx.drawImage(tile,x,y);
+    ctx.globalAlpha=1;
+    const road=ctx.createLinearGradient(0,280,0,377);road.addColorStop(0,"#e4cf9900");road.addColorStop(.15,r.path);road.addColorStop(.75,r.path);road.addColorStop(1,"#2d302500");
+    ctx.fillStyle=road;ctx.fillRect(cam,277,view,108);
+    for(let x=Math.floor(cam/34)*34;x<cam+view;x+=34)for(let y=299;y<365;y+=22){this.ellipse(x+(y%3)*5,y,12,7,"#e4d8b61b");ctx.strokeStyle="#3c3e2926";ctx.beginPath();ctx.moveTo(x-9,y+5);ctx.lineTo(x+10,y+5);ctx.stroke();}
+    ctx.restore();
+  },
+  human(x,y,color="#698578",armored=false,face=0) {
+    this.shadow(x,y+21,25);ctx.save();ctx.translate(x,y);
+    const step=armored&&keys.size?Math.sin(t*10)*2:Math.sin(t*2+x)*.35;
+    this.poly([[-10,-1],[-16,18],[0,24],[13,17],[8,-2]],color,"#27373b");
+    this.ellipse(-5,19+step,4,8,"#36414a");this.ellipse(5,19-step,4,8,"#28343e");
+    this.ellipse(0,2,10,15,armored?this.metal(-10,-10,20,25):color);
+    this.ellipse(-11,3,4,10,armored?"#879ca0":color);this.ellipse(11,3,4,10,armored?"#637b85":color);
+    this.ellipse(-11,11,3,4,"#c49a77");this.ellipse(11,11,3,4,"#c49a77");
+    rect(-9,10,18,3,"#70533b");rect(-2,10,4,3,"#d0ae6d");
+    if(armored){
+      this.ellipse(0,-19,11,13,this.metal(-11,-32,22,26));
+      this.poly([[-10,-20],[10,-20],[8,-7],[0,-3],[-8,-7]],this.metal(-10,-20,20,17),"#435a62");
+      rect(-8,-18,16,3,"#162c35");for(let i=-5;i<=5;i+=5)rect(i,-12,1,4,"#30464f");
+      this.poly([[-2,-30],[1,-40],[10,-34],[4,-29]],"#aa5945");
+      ctx.strokeStyle="#e1e4d0";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-7,-1);ctx.lineTo(0,6);ctx.lineTo(7,-1);ctx.stroke();
+    }else{
+      this.ellipse(0,-18,7.5,10,"#d8b38c");this.ellipse(0,-25,8,5,"#584333");
+      this.ellipse(-6,-20,2,6,"#584333");circle(-3,-18,1,"#28383b");circle(3,-18,1,"#28383b");
+      ctx.strokeStyle="#8e624b";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-2,-12);ctx.lineTo(2,-12);ctx.stroke();
+    }
+    ctx.restore();
+  },
+  slime(x,y,color,friendly) {
+    this.shadow(x,y+14,24);const g=ctx.createRadialGradient(x-6,y-9,2,x,y,23);g.addColorStop(0,"#deedbf");g.addColorStop(.4,color);g.addColorStop(1,"#365951");
+    this.ellipse(x,y,20,15+Math.sin(t*4)*1.5,g);this.ellipse(x-7,y-8,5,2,"#f3ffdc66");
+    this.ellipse(x-7,y-1,2,3,friendly?"#263e37":"#e5694f");this.ellipse(x+7,y-1,2,3,friendly?"#263e37":"#e5694f");
+    ctx.strokeStyle="#314a40";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y+3,5,0,Math.PI);ctx.stroke();
+  },
+  dragon(x,y,color,friendly,scale=1) {
+    this.shadow(x,y+20,32*scale);ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
+    const flap=Math.sin(t*5)*4;
+    const membrane=ctx.createLinearGradient(-35,-35,0,5);membrane.addColorStop(0,"#e3c18a");membrane.addColorStop(1,color);
+    this.poly([[-6,1],[-43,-31-flap],[-31,-29],[-21,-10],[-17,-24],[-7,-12],[3,7]],membrane,"#755b4b");
+    this.poly([[3,2],[21,-38-flap],[35,-19],[20,-23],[19,-9],[10,-4]],membrane,"#755b4b");
+    ctx.strokeStyle=color;ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-8,9);ctx.bezierCurveTo(-39,21,-43,4,-49,6);ctx.stroke();
+    this.ellipse(0,5,19,13,this.metal(-19,-8,38,26,"#e5cfa1",color));
+    this.ellipse(10,-8,9,15,color);this.ellipse(18,-17,13,9,color);this.ellipse(29,-13,9,5,color);
+    this.poly([[11,-23],[11,-35],[17,-24]],"#eadbb7","#756b55");this.poly([[23,-24],[28,-32],[27,-19]],"#eadbb7","#756b55");
+    for(let i=0;i<5;i++)this.poly([[-15+i*6,-4],[-13+i*6,-12],[-9+i*6,-4]],"#c7b078");
+    this.ellipse(-8,19,5,5,color);this.ellipse(10,19,5,5,color);circle(24,-19,2.5,friendly?"#91ddaf":"#ff8158");circle(25,-19,1,"#132626");
+    for(let i=0;i<18;i++)this.ellipse(-12+i%6*5,1+Math.floor(i/6)*5,2,1,"#fff4cb22");
+    ctx.restore();
+  },
+});
+// Cached rounded foliage avoids hundreds of gradients on every frame.
+tree = function(x,y,s=1) {
+  const biome=World.location?World.current().biome:"wood", key="tree-"+biome;
+  if(!Art.cache.has(key)){
+    const c=document.createElement("canvas");c.width=110;c.height=140;const g=c.getContext("2d");
+    g.fillStyle="#071b182e";g.beginPath();g.ellipse(61,118,42,14,0,0,Math.PI*2);g.fill();
+    g.fillStyle="#665039";g.beginPath();g.moveTo(49,122);g.lineTo(52,47);g.lineTo(59,44);g.lineTo(65,121);g.closePath();g.fill();
+    g.strokeStyle="#ac8c5b";g.lineWidth=2;g.beginPath();g.moveTo(55,119);g.lineTo(56,67);g.stroke();
+    for(let i=0;i<35;i++){const px=55+Math.sin(i*2.39)*32,py=47+Math.cos(i*1.31)*26,rad=13+(i%5);const gr=g.createRadialGradient(px-4,py-5,2,px,py,rad);gr.addColorStop(0,biome==="snow"?"#d3e0d4":"#789455");gr.addColorStop(.45,biome==="snow"?"#8caea0":"#3f6843");gr.addColorStop(1,"#254c39");g.fillStyle=gr;g.beginPath();g.arc(px,py,rad,0,Math.PI*2);g.fill();}
+    let seed = 1439;
+    for(let i=0;i<560;i++){
+      seed=seed*16807%2147483647; const lx=20+(seed/2147483647)*70;
+      seed=seed*16807%2147483647; const ly=12+(seed/2147483647)*75;
+      if(((lx-55)/38)**2+((ly-49)/35)**2>1)continue;
+      g.fillStyle=biome==="snow"?(i%3?"#d8e3d14d":"#698e7944"):(i%3?"#bbbf793d":"#173e3066");
+      g.beginPath();g.ellipse(lx,ly,2.5,1.2,(i%5)*.6,0,Math.PI*2);g.fill();
+    }
+    Art.cache.set(key,c);
+  }
+  ctx.drawImage(Art.cache.get(key),x-55*s,y-95*s,110*s,140*s);
+};
+World.person=function(n){Art.human(n.x,n.y,n.color);if(n.kind==="ruler"){Art.poly([[n.x-7,n.y-29],[n.x-8,n.y-37],[n.x-2,n.y-33],[n.x,n.y-39],[n.x+3,n.y-33],[n.x+8,n.y-37],[n.x+7,n.y-29]],"#e7c46c");text(this.record().claimed?"✦":this.record().accepted?"?":"!",n.x,n.y-44,16,"#ffe3a0");}};
+World.house=function(h,r){
+  Art.poly([[h.x+8,h.y+15],[h.x+h.w+25,h.y+25],[h.x+h.w+34,h.y+h.h+14],[h.x+20,h.y+h.h+15]],"#12221f40");
+  const wall=ctx.createLinearGradient(h.x,h.y,h.x+h.w,h.y+h.h);wall.addColorStop(0,r.wall);wall.addColorStop(1,"#9a9178");ctx.fillStyle=wall;ctx.fillRect(h.x,h.y,h.w,h.h);
+  ctx.strokeStyle="#695d4b33";ctx.lineWidth=.7;for(let y=h.y+8;y<h.y+h.h;y+=11){ctx.beginPath();ctx.moveTo(h.x,y);ctx.lineTo(h.x+h.w,y);ctx.stroke();for(let x=h.x+(Math.floor(y/11)%2)*15;x<h.x+h.w;x+=30){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+11);ctx.stroke();}}
+  const roof=ctx.createLinearGradient(0,h.y-40,0,h.y+5);roof.addColorStop(0,r.roof);roof.addColorStop(1,"#5d5147");
+  if(r.biome==="sand"){Art.ellipse(h.x+h.w/2,h.y,h.w*.51,33,roof);rect(h.x-5,h.y-3,h.w+10,7,r.roof);}else{Art.poly([[h.x-10,h.y+2],[h.x+h.w*.5,h.y-48],[h.x+h.w+10,h.y+2]],roof,"#403d36");ctx.save();ctx.beginPath();ctx.moveTo(h.x-10,h.y+2);ctx.lineTo(h.x+h.w*.5,h.y-48);ctx.lineTo(h.x+h.w+10,h.y+2);ctx.clip();for(let y=h.y-42;y<h.y+3;y+=7){rect(h.x-10,y,h.w+20,1,r.biome==="snow"?"#e1e9da":"#d8b49440");for(let x=h.x+(y%3)*9;x<h.x+h.w;x+=14)rect(x,y,1,7,"#403a3544");}ctx.restore();}
+  for(const x of [h.x+16,h.x+h.w-30]){rect(x-3,h.y+23,20,25,"#514e42");const glow=ctx.createLinearGradient(x,h.y+24,x,h.y+47);glow.addColorStop(0,"#ffe5a0");glow.addColorStop(1,"#a77d48");ctx.fillStyle=glow;ctx.fillRect(x,h.y+25,14,20);rect(x+6,h.y+25,2,20,"#776044");rect(x,h.y+35,14,2,"#776044");}
+  const door=h.x+h.w/2;rect(door-12,h.y+h.h-36,24,36,"#55483a");for(let x=door-10;x<door+12;x+=5)rect(x,h.y+h.h-35,1,34,"#b99b6944");circle(door+7,h.y+h.h-17,2,"#d5b978");rect(h.x,h.y+h.h-4,h.w,5,"#7c7966");
+  if(h.kind==="hall"){for(const x of [h.x+8,h.x+h.w-17]){Art.poly([[x,h.y+9],[x+10,h.y+9],[x+10,h.y+40],[x+5,h.y+35],[x,h.y+40]],r.roof);}text("✦",door,h.y+24,17,"#e7bc6c");}
+  if(h.kind==="smith"){rect(h.x+h.w-22,h.y-35,17,38,"#79776c");torch(h.x+15,h.y+h.h-17);}
+  if(h.name)text(h.name,h.x+h.w/2,h.y+h.h+17,9,"#f2e1be");
+};
+knight=function(){
+  ctx.save();if(p.inv>0&&Math.sin(t*35)>0)ctx.globalAlpha=.55;
+  if(p.roll>0){ctx.translate(p.x,p.y);ctx.rotate(t*23);ctx.translate(-p.x,-p.y);}
+  Art.human(p.x,p.y,"#885347",true,p.face);
+  ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.face);
+  if(p.attack>0){ctx.strokeStyle=p.fire?"#ffd394":"#dcecedaa";ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,0,52,-1.1,1.1);ctx.stroke();}
+  Art.poly([[15,-2],[48,-3],[55,0],[48,3],[15,2]],Art.metal(15,-3,40,6),"#ced9ce");rect(18,-8,3,16,"#cfac63");rect(9,-2,9,4,"#705340");
+  if(p.shield){ctx.strokeStyle=p.parry>0?"#fff0b7":"#afd6d7";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,28,-1.1,1.1);ctx.stroke();}
+  ctx.restore();Art.poly([[p.x-23,p.y-2],[p.x-11,p.y-4],[p.x-9,p.y+12],[p.x-16,p.y+21],[p.x-23,p.y+12]],Art.metal(p.x-23,p.y-4,14,25),"#c2ae77");ctx.restore();
+};
+Journeys.dragonSprite=(x,y,color,friendly,scale)=>Art.dragon(x,y,color,friendly,scale);
+Journeys.friendSprite=function(f,x,y){if(f.role==="dragon")Art.dragon(x,y,f.color,true,.8);else if(f.role==="slime")Art.slime(x,y,f.color,true);else Art.human(x,y,f.color);};
+drawDragon=function(x,y,caged){Art.dragon(x,y+Math.sin(t*4)*2,"#b28a55",true,.8);if(caged){for(let i=-28;i<=28;i+=14)rect(x+i,y-33,2,66,"#acb7aabb");rect(x-30,y-35,62,3,"#bac2b3");text("EMBER",x,y-46,11,"#f0d396");}};
+const formerEnemy=drawEnemy;
+drawEnemy=function(e){
+  if(e.hp<=0)return;
+  if(e.species)return Journeys.drawEnemy(e);
+  if(e.type!=="slime")return formerEnemy(e);
+  Art.slime(e.x,e.y,e.flash>0?"#fff0c0":"#8aa769",false);
+  if(e.wind>0){ctx.strokeStyle="#ffba76";ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,29,0,Math.PI*2);ctx.stroke();}
+  if(e.hp<e.max){rect(e.x-15,e.y-30,30,3,"#283f36");rect(e.x-15,e.y-30,30*e.hp/e.max,3,"#e6b07a");}
+};
+Journeys.drawEnemy=function(e){
+  if(e.hp<=0)return;const x=e.x,y=e.y;Art.shadow(x,y+19,30);
+  if(e.species==="drake")Art.dragon(x,y,e.flash>0?"#fff0c1":"#a56a5d",false,1.1);
+  if(e.species==="wolf"){
+    const fur=Art.metal(x-25,y-14,50,30,"#c8c6b4",e.flash>0?"#fff0c1":"#5c6b71");
+    ctx.strokeStyle="#778184";ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x-15,y);ctx.quadraticCurveTo(x-36,y-7,x-37,y-20);ctx.stroke();
+    Art.ellipse(x-2,y,23,12,fur);for(const dx of [-15,8]){Art.poly([[x+dx-3,y+4],[x+dx+4,y+4],[x+dx+1,y+24],[x+dx-5,y+24]],"#536369");}
+    Art.ellipse(x+17,y-12,12,13,fur);Art.poly([[x+8,y-19],[x+9,y-35],[x+19,y-22],[x+24,y-32],[x+27,y-14]],fur,"#55656a");Art.ellipse(x+29,y-9,12,5,"#8c9390");circle(x+39,y-10,3,"#273738");circle(x+22,y-17,2,"#ffac62");
+  }
+  if(e.species==="ogre"){ctx.save();ctx.translate(x,y);ctx.scale(1.65,1.65);Art.human(0,0,e.flash>0?"#fff0c1":"#838766");ctx.restore();Art.poly([[x-8,y-15],[x-5,y-24],[x-2,y-14]],"#e7d6b1");rect(x+29,y-6,7,38,"#77583e");Art.ellipse(x+33,y-8,14,11,"#82725b");}
+  if(e.wind>0){ctx.strokeStyle="#ffc087";ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,e.species==="ogre"?48:34,0,Math.PI*2);ctx.stroke();}
+  text("HOSTILE · "+{wolf:"FANG WOLF",ogre:"CHARGE OGRE",drake:"FIRE DRAKE"}[e.species],x,y-(e.species==="ogre"?58:45),9,"#ffbe9c");
+  if(e.hp<e.max){rect(x-18,y-34,36,3,"#463e3c");rect(x-18,y-34,36*e.hp/e.max,3,"#e99872");}
+};
+// Preserve the combat telegraphs, replacing only the guardian's block silhouette.
+const illustratedBoss=drawBoss;
+drawBoss=function(){
+  // Render original warnings without its body by clipping to outside the figure.
+  ctx.save();ctx.beginPath();ctx.rect(-10000,-10000,20000,20000);ctx.rect(boss.x-53,boss.y-94,120,150);ctx.clip("evenodd");illustratedBoss();ctx.restore();
+  if(boss.dead){Art.ellipse(boss.x,boss.y+10,35,13,"#78817a");return;}
+  ctx.save();ctx.translate(boss.x,boss.y);ctx.scale(2,2);Art.human(0,0,boss.phase===2?"#8d5357":"#4b6369",true);ctx.restore();
+  Art.poly([[boss.x-15,boss.y-63],[boss.x-19,boss.y-83],[boss.x-5,boss.y-74],[boss.x,boss.y-88],[boss.x+6,boss.y-74],[boss.x+19,boss.y-83],[boss.x+15,boss.y-63]],"#c7ad71","#e5d09b");
+  if(boss.stun>0)text("EXPOSED",boss.x,boss.y-96,11,"#ffe5a0");
+};
+canvas.style.imageRendering="auto";
 
 </script>
   </body>

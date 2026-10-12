@@ -127,3 +127,13 @@ The October 11 expansion adds five layers, with the same movement, Action, and D
 **Adventures** tracks local optional tasks. Royal quests, three-resource/five-foe gates, two selected companions, and the town → wilderness → guardian loop remain intact. Existing browser saves acquire the new optional state without being reset. The source module is `adventures.js`, included in every portable HTML build.
 
 Validation: `node tests/adventures.browser.cjs` checks all four town restorations, reachable pickups/runes, duplicate reward prevention, companion errands, partial/completed saves, old-save compatibility, dragon gating, boss warning/hit/escape behavior, and real Space/menu interactions. The original simulation, kingdom, journey, and frontier suites also pass. Automated guardian progression uses simulated victories; human difficulty and fun still need playtesting.
+
+## Illustrated graphics, individual names, and trail guidance
+
+The browser edition now uses shaded armor and character silhouettes, rounded textured foliage, masonry and tiled roofs, ground materials, softer path edges, and redesigned dragons, wolves, ogres, and slimes. Canvas backing resolution adapts up to 2× for sharper rendering on MacBook displays. Artwork is procedural and bundled locally; the game remains self-contained and playable offline. This is a more detailed illustrated 2D style.
+
+Later-road companions receive individual names instead of numeric suffixes. Existing internal IDs remain unchanged, preserving recruitment, the active party, and personal quests. The first 49 generated roads have unique names across all realms and roles; later names use deterministic family-name combinations.
+
+Sunblossoms now look like flowers and have explicit labels. A trail guide below the game points toward the next royal objective, including remaining resources, gate readiness, returning for a seal, and onward travel. Adventures offers Royal quest, Local adventures, or Hide guide; the preference is saved. Guidance never changes objective requirements or grants progress.
+
+`node tests/presentation.browser.cjs` checks name uniqueness and saved companion identity, guide milestones and preference persistence, rendering in every realm, and creature/boss drawing. All gameplay regression suites should be run alongside it.
