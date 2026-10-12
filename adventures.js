@@ -2,7 +2,7 @@
 // Optional adventures use the existing save envelope and Action control.
 const Adventures = (globalThis.Adventures = {
   realms: {
-    greenvale: { landmark: "The Singing Oak", keeper: "Ada the gardener", problem: "The oak has lost its song. Bring back its wind chime from the northern trail.", item: "wind chime", thanks: "Listen—the whole town can hear the oak again!", color: "#a9df92", secret: "Canopy Sanctuary" },
+    greenvale: { landmark: "The Singing Oak", keeper: "Ada the dragonborn gardener", problem: "The oak has lost its song. Bring back its wind chime from the northern trail.", item: "wind chime", thanks: "Listen—the whole town can hear the oak again!", color: "#a9df92", secret: "Canopy Sanctuary" },
     frostmarch: { landmark: "The Aurora Beacon", keeper: "Bryn the lamplighter", problem: "Travelers cannot see our beacon. Find its frost crystal on the northern trail.", item: "frost crystal", thanks: "The beacon shines again. No traveler need lose the road tonight.", color: "#9ee7ff", secret: "Aurora Roost" },
     sunreach: { landmark: "The Moonwater Fountain", keeper: "Suri the waterkeeper", problem: "Our fountain has run dry. Recover its brass valve from the northern trail.", item: "brass valve", thanks: "Water for everyone! You have brought our square back to life.", color: "#ffdb91", secret: "Skyglass Oasis" },
     ashenreach: { landmark: "The Ember Bell", keeper: "Ivo the bellkeeper", problem: "Our bell is silent. Find its ember clapper on the northern trail.", item: "ember clapper", thanks: "The bell rings for friends and dragons alike. Welcome home.", color: "#ffac8e", secret: "Starfire Nest" },
@@ -28,7 +28,7 @@ const Adventures = (globalThis.Adventures = {
   reward(gold, potions = 0) { p.gold += gold; World.extras.potions += potions; save(); },
   townTalk() {
     const r = this.record(), theme = this.theme();
-    World.open(theme.keeper, `<p><strong>${theme.landmark}</strong></p><p>${r.restored ? theme.thanks : r.found ? "You found it! Shall we restore our landmark?" : theme.problem}</p><p>Optional town adventure · Reward: 20 gold and a healing potion.</p>`, [
+    World.open(theme.keeper, `${World.location === "greenvale" ? '<p>Ada is a female dragonborn gardener from Middle-earth. She tends the Singing Oak and welcomes travelers beneath its branches.</p>' : ""}<p><strong>${theme.landmark}</strong></p><p>${r.restored ? theme.thanks : r.found ? "You found it! Shall we restore our landmark?" : theme.problem}</p><p>Optional town adventure · Reward: 20 gold and a healing potion.</p>`, [
       r.restored ? { label: "Enjoy the restored landmark", run: () => World.close() } : r.found ? { label: "Restore " + theme.landmark, run: () => { if (!r.restored && r.found) { r.restored = true; this.reward(20, 1); } World.close(); notify(theme.thanks); } } : { label: r.accepted ? "Keep exploring the northern trail" : "I will help", run: () => { r.accepted = true; save(); World.close(); notify("Northern trail: look for the golden quest marker beyond town."); } },
     ]);
   },
@@ -162,7 +162,8 @@ const Adventures = (globalThis.Adventures = {
     if (World.location === "ashenreach") { rect(x - 30, y - 70, 8, 100, "#aa8060"); rect(x + 22, y - 70, 8, 100, "#aa8060"); rect(x - 30, y - 70, 60, 8, "#cca276"); circle(x, y - 28, 22, r.restored ? "#ffcd79" : "#9d785a"); rect(x - 26, y - 14, 52, 8, "#d8a573"); }
     text(theme.landmark, x, y + 64, 11, theme.color);
     text(r.restored ? "RESTORED" : "TOWN ADVENTURE", x, y - 89, 10, "#fff1b6");
-    if (globalThis.Realistic?.loaded) World.person({kind:"villager",x:s.keeper.x,y:s.keeper.y,color:theme.color});
+    if (World.location === "greenvale" && globalThis.Realistic?.keeper(s.keeper.x,s.keeper.y)) {}
+    else if (globalThis.Realistic?.loaded) World.person({kind:"villager",x:s.keeper.x,y:s.keeper.y,color:theme.color});
     else Journeys.friendSprite({role: "guard", color: theme.color}, s.keeper.x, s.keeper.y);
     text(theme.keeper, s.keeper.x, s.keeper.y + 38, 10, "#fff1b6");
     if (!globalThis.Realistic?.camp(800,353)) {circle(800, 353, 16, "#ef9566"); circle(800, 348, 9, "#ffe0a0");} text("CAMP · TALK", 800, 325, 10, "#ffe0a0");

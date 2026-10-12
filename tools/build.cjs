@@ -31,7 +31,7 @@ const adventures = frontier.replace(
 );
 const illustrated = adventures.replace('<script src="art.js"></script>', () => "<script>\n" + read("art.js") + "\n</script>");
 let realistic = read("realistic.js");
-for (const file of ["realistic-sprites.png", "realistic-terrain.png"]) {
+for (const file of ["realistic-sprites.png", "realistic-terrain.png", "ada-dragonborn.png"]) {
   const asset = "assets/" + file;
   realistic = realistic.replace(asset, "data:image/png;base64," + fs.readFileSync(path.join(root, asset)).toString("base64"));
 }

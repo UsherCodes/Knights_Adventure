@@ -603,6 +603,7 @@ const World = (globalThis.World = {
     globalThis.Journeys?.update(dt || 0);
   },
   open(title, body, actions = [], wide = false) {
+    this.menuKind = null;
     if (state !== "worldmenu")
       this.menuReturn = state === "paused" ? "paused" : "playing";
     state = "worldmenu";
@@ -771,7 +772,7 @@ const World = (globalThis.World = {
         this.extras.potions +
         " healing potion" +
         (this.extras.potions === 1 ? "" : "s") +
-        '</p><p>Potions restore three hearts. Your relics and Ember travel with you between kingdoms.</p><div class="bag-relics">' +
+        '</p><p>Combat pauses while your bag is open. Press B or close the bag to resume.</p><p>Potions restore three hearts. Your relics and Ember travel with you between kingdoms.</p><div class="bag-relics">' +
         ["Firebrand", "Mirror Shield", "Ghoststep"]
           .map(
             (name, i) =>
@@ -798,6 +799,7 @@ const World = (globalThis.World = {
         },
       ],
     );
+    this.menuKind = "bag";
     globalThis.Journeys?.addPartyButton();
   },
   talk(kind) {
@@ -1287,7 +1289,7 @@ const World = (globalThis.World = {
 const worldButtons = document.createElement("div");
 worldButtons.className = "world-buttons";
 worldButtons.innerHTML =
-  '<button id="world-location" title="World map (M)">Map</button><button id="journal-button" title="Quest journal">Quests</button><button id="bag-button" title="Healing potions and relics">Bag</button>';
+  '<button id="world-location" title="World map (M)">Map</button><button id="journal-button" title="Quest journal">Quests</button><button id="bag-button" title="Open bag anytime, including combat (B)">Bag · B</button>';
 $(".header-right").prepend(worldButtons);
 const modal = document.createElement("div");
 modal.id = "world-modal";
@@ -1299,6 +1301,12 @@ $("#world-location").onclick = () => World.openMap();
 $("#journal-button").onclick = () => World.journal();
 $("#bag-button").onclick = () => World.bag();
 window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "b" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault();
+    if (state === "worldmenu" && World.menuKind === "bag") World.close();
+    else World.bag();
+    return;
+  }
   if (e.key.toLowerCase() === "m" && !e.repeat) {
     e.preventDefault();
     if (state === "worldmenu") World.close();

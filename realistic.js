@@ -136,3 +136,17 @@ drawBoss=function(){
   if(e.phase===2){ctx.strokeStyle='#ffc07c';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+38,34,9,0,0,Math.PI*2);ctx.stroke();}
   if(e.stun>0)text('EXPOSED',e.x,e.y-103,11,'#ffe5a0');
 };
+
+// Ada has her own character art; other town keepers retain their identities.
+Realistic.ada = new Image();
+Realistic.adaReady = new Promise(resolve => {
+  Realistic.ada.onload = () => resolve(true);
+  Realistic.ada.onerror = () => resolve(false);
+  Realistic.ada.src = 'assets/ada-dragonborn.png';
+});
+Realistic.keeper = function(x,y) {
+  if (!this.ada.complete || !this.ada.naturalWidth) return false;
+  Art.shadow(x,y+22,25);
+  ctx.drawImage(this.ada,x-31,y-68,62,93);
+  return true;
+};

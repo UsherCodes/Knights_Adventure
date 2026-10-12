@@ -59,7 +59,7 @@ const { pathToFileURL } = require('node:url');
   await page.screenshot({path:process.env.SCREENSHOT_DIR?path.join(process.env.SCREENSHOT_DIR,'town-adventures.png'):'/tmp/town-adventures.png'});
   await page.evaluate(()=>{World.travel('greenvale');p.x=870;p.y=500;enemies.forEach(e=>e.hp=0);state='playing';update(0);});
   await page.keyboard.press('Space');
-  assert.equal(await page.locator('#world-panel h2').innerText(),'Ada the gardener');
+  assert.equal(await page.locator('#world-panel h2').innerText(),'Ada the dragonborn gardener');
   await page.getByRole('button',{name:'I will help',exact:true}).click();
   await page.getByRole('button',{name:'Adventures',exact:true}).click();
   assert.equal(await page.locator('#world-panel h2').innerText(),'Local adventures');

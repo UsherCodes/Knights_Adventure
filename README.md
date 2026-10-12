@@ -147,3 +147,9 @@ This remains a 2D game with sprite movement, subtle bobbing and existing combat 
 `realistic.js` loads `assets/realistic-sprites.png` and `assets/realistic-terrain.png`; `tools/build.cjs` embeds both directly into each portable HTML file, so downloads also work offline. The two original atlases total about 6.4 MB; each self-contained HTML copy is consequently larger. Failed image loads fall back to the illustrated renderer.
 
 `node tests/realistic.browser.cjs` checks decoded artwork, source bounds, transparency, offline loading without network requests, four kingdoms, companions, guardian telegraphs, unchanged save state, mobile layout, and the failed-art fallback. Gameplay regression suites and presentation/save migration checks accompany it. Screenshots are reviewed visually; device-specific MacBook performance and human playtesting remain separate checks.
+
+## Bag during combat and Ada
+
+Press **B** or click **Bag · B** during ordinary fights or guardian battles. The menu pauses the action, including pending attack warnings; drinking a potion consumes one and restores up to three hearts. Press B, Escape, or close the menu to resume. Opening the bag from an already paused game returns to that paused state.
+
+Ada is now a female dragonborn gardener from Middle-earth, with a dedicated realistic sprite (scales, horns, woodland robes and herb apron). Her Singing Oak quest keeps its existing saved state. Other town keepers are unchanged. The new art is embedded in portable builds. `tests/combat-bag-ada.browser.cjs` covers combat menu access, frozen timers, potion consumption, keyboard/click closing, paused return, Ada's identity and quest compatibility.
