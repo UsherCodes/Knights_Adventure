@@ -1,0 +1,25 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const {pathToFileURL}=require('node:url');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH||undefined});try{
+ const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(pathToFileURL(path.join(__dirname,'../play.html')).href);assert(await page.evaluate(()=>Realistic.adaReady));await page.click('#start');
+ await page.evaluate(()=>{boss.active=true;boss.dead=false;boss.adventureMove={kind:'cross',x:600,y:300,time:1.5};p.hp=2;p.inv=2;World.extras.potions=2;});
+ await page.keyboard.press('b');
+ const frozen=await page.evaluate(()=>({state,hp:p.hp,time:boss.adventureMove.time,x:p.x,potions:World.extras.potions}));assert.equal(frozen.state,'worldmenu');
+ await page.waitForTimeout(450);assert.deepEqual(await page.evaluate(()=>({state,hp:p.hp,time:boss.adventureMove.time,x:p.x,potions:World.extras.potions})),frozen);
+ await page.getByRole('button',{name:'Drink potion (+3 hearts)',exact:true}).click();
+ assert(await page.evaluate(()=>state==='playing'&&p.hp===5&&World.extras.potions===1&&boss.active));
+ await page.keyboard.press('b');assert(await page.evaluate(()=>state==='worldmenu'));await page.keyboard.press('b');assert(await page.evaluate(()=>state==='playing'));
+ await page.click('#bag-button');assert(await page.evaluate(()=>state==='worldmenu'));await page.keyboard.press('Escape');assert(await page.evaluate(()=>state==='playing'));
+ await page.evaluate(()=>{state='paused';});await page.keyboard.press('b');await page.keyboard.press('b');assert(await page.evaluate(()=>state==='paused'),'bag preserves existing pause');
+ console.log('PASS: B and Bag during combat, frozen attack timer, potion exactly once, B/Escape resume, paused return');
+ await page.evaluate(()=>{boss.active=false;boss.adventureMove=null;World.travel('greenvale');state='paused';Adventures.record().accepted=true;Adventures.record().found=true;save();load();state='paused';});
+ assert(await page.evaluate(()=>Adventures.record().accepted&&Adventures.record().found),'existing Ada quest survives');
+ await page.evaluate(()=>Adventures.townTalk());assert((await page.locator('#world-panel').innerText()).includes('female dragonborn gardener from Middle-earth'));
+ await page.evaluate(()=>{World.close();World.record('greenvale').claimed=true;World.travel('frostmarch');Adventures.townTalk();});assert(!(await page.locator('#world-panel').innerText()).includes('Ada is'),'other keepers unchanged');
+ await page.evaluate(()=>{World.close();World.travel('greenvale');p.x=770;p.y=460;cam=370;update(0);state='paused';toastTime=0;document.querySelector('#toast').style.opacity=0;draw();});
+ if(process.env.SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.SCREENSHOT_DIR,'Ada-Dragonborn-In-Game.png')});
+ assert.deepEqual(errors,[]);console.log('PASS: Ada artwork, identity, quest compatibility and other keepers');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
